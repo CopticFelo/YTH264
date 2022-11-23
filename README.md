@@ -1,4 +1,4 @@
-# YT_H264
+# YT-H264
 
 A Clean, Modern Youtube Downloader App
 
