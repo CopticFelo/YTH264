@@ -115,7 +115,7 @@ class _QueuePageState extends State<QueuePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
-              height: 40,
+              height: 43,
               width: double.infinity,
               decoration: BoxDecoration(
                   color: Colors.black, borderRadius: BorderRadius.circular(12)),
@@ -134,7 +134,7 @@ class _QueuePageState extends State<QueuePage> {
                             fontFamily: 'Helvetica',
                             fontWeight: FontWeight.bold,
                             fontSize:
-                                MediaQuery.of(context).size.height * 0.028))
+                                MediaQuery.of(context).textScaleFactor * 25))
                   ],
                 ),
               ),

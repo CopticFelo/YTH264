@@ -79,15 +79,19 @@ class _AddModalPopupState extends State<AddModalPopup> {
                                 print('Real Button Pressed');
                                 if (_uriController.text != '') {
                                   try {
-                                    downloadButton =
-                                        CircularProgressIndicator();
+                                    setState(() {
+                                      downloadButton = Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    });
                                     widget.vidInfo = await widget.ytServ
                                         .getVidInfo(_uriController.text)
                                         .then((value) {
                                       setState(() {
                                         downloadButton = Icon(Icons.search);
                                       });
-                                      return null;
+                                      return value;
                                     });
                                     print(widget.vidInfo!.title);
                                     setState(() {});
@@ -102,7 +106,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
                                       'Enter Link', context);
                                 }
                               },
-                              child: const Icon(Icons.download),
+                              child: downloadButton,
                             ),
                           ),
                         ),
