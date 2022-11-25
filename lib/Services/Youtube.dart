@@ -21,6 +21,6 @@ class YoutubeService {
         author: video.author,
         videoOnlyStreams: vids,
         bestAudio: bestAudio,
-        thumbnail: 'https://img.youtube.com/vi/${video.id}/0.jpg');
+        thumbnail: 'https://img.youtube.com/vi/${video.id}/maxresdefault.jpg');
   }
 }

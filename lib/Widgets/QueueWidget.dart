@@ -209,7 +209,7 @@ class _QueueWidgetState extends State<QueueWidget> {
               child: Visibility(
                 visible: MediaQuery.of(context).size.width > 350 ? true : false,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(17),
+                  borderRadius: BorderRadius.circular(7),
                   child: Image.network(
                     widget.ytobj.thumbnail,
                     fit: BoxFit.fill,
