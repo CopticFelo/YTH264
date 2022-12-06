@@ -1,22 +1,36 @@
+
 name: Build App
 
-on:
-  push:
-    branches: [ "master" ]
+#on:
+ # push:
+  #  branches: [ "master" ]
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Test
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: "12.x"
       - uses: subosito/flutter-action@v2
-      
-      # Update Everything
-      - run: Flutter pub get
-      
-      
-      # Build
-      - run: Flutter build appbundle
-  
+        with:
+          channel: 'stable'
+      - name: Get dependencies
+        run: flutter pub get
+      - name: Build apk
+        run: flutter build apk
+      # - uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ git }}
+        
