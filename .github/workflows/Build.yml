@@ -25,10 +25,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.ref }}
           prerelease: true
           generate_release_notes: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk
-
-
-        
