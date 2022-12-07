@@ -1,5 +1,6 @@
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:http/http.dart' as http;
 
 class YoutubeService {
   final _serv = YoutubeExplode();
@@ -20,7 +21,8 @@ class YoutubeService {
 
     // get max res thumbnail
     String imgUri = "https://img.youtube.com/vi/${video.id}/maxresdefault.jpg";
-    if (uri.contains("shorts")) {
+    bool isImage = await validateImage(imgUri);
+    if (uri.contains("shorts") || !isImage) {
       imgUri = "https://img.youtube.com/vi/${video.id}/0.jpg";
     }
 
@@ -30,5 +32,25 @@ class YoutubeService {
         videoOnlyStreams: vids,
         bestAudio: bestAudio,
         thumbnail: imgUri);
+  }
+
+  Future<bool> validateImage(String imageUrl) async {
+    http.Response res;
+    try {
+      res = await http.get(Uri.parse(imageUrl));
+    } catch (e) {
+      return false;
+    }
+
+    if (res.statusCode != 200) return false;
+    Map<String, dynamic> data = res.headers;
+    return checkIfImage(data['content-type']);
+  }
+
+  bool checkIfImage(String param) {
+    if (param == 'image/jpeg' || param == 'image/png') {
+      return true;
+    }
+    return false;
   }
 }
