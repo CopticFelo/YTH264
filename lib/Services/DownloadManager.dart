@@ -143,18 +143,17 @@ class DownloadManager {
         .replaceAll(':', '')
         .replaceAll("'", '')
         .replaceAll('"', '');
-    String imgPath = '${temp.path}/${ytobj.title}.jpg';
+    String imgPath = '${temp.path}/${title}.jpg';
     File? imgfile = await getImageAsFile(ytobj.thumbnail, imgPath);
     String audioDir =
-        "'${downloads!.path}/$title.${ytobj.bestAudio.container.name}'";
+        '"${downloads!.path}/$title.${ytobj.bestAudio.container.name}"';
     String command = '';
 
     if (imgfile != null) {
       command =
           '-y -i $audioDir -i "$imgPath" -map 0 -map 1 -metadata artist="${ytobj.author}" -metadata title="${ytobj.title}" "${downloads.path}/$title.mp3"';
     } else {
-      command =
-          '-y -i $audioDir -map 0 -map 1 -metadata artist="${ytobj.author}" -metadata title="${ytobj.title}" "${downloads.path}/$title.mp3"';
+      command = '-y -i $audioDir "${downloads.path}/$title.mp3"';
     }
 
     print(command);
@@ -165,7 +164,9 @@ class DownloadManager {
         GlobalMethods.snackBarError(session.getOutput().toString(), context);
       }
       File old = File(audioDir.replaceAll("'", ''));
-      await old.delete();
+      try {
+        await old.delete();
+      } catch (e) {}
       if (imgfile != null) {
         await imgfile.delete();
       }
