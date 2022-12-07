@@ -43,6 +43,7 @@ dependencies:
     remove_emoji: ^0.0.7
     another_flushbar: ^1.12.29
     permission_handler: ^10.2.0
+    receive_sharing_intent: ^1.4.5
 
 dev_dependencies:
     flutter_launcher_name: "^0.0.1"

@@ -1,9 +1,12 @@
 // ignore: file_names
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:YT_H264/Screens/AddPopup.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Widgets/QueueWidget.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class QueuePage extends StatefulWidget {
   GlobalKey<AnimatedListState> listkey = GlobalKey<AnimatedListState>();
@@ -16,6 +19,27 @@ class QueuePage extends StatefulWidget {
 }
 
 class _QueuePageState extends State<QueuePage> {
+  late StreamSubscription _intentDataStreamSubscription;
+  String? _sharedText;
+  void initState() {
+    super.initState();
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) {
+      setState(() {
+        _sharedText = value;
+        print("Shared: $_sharedText");
+      });
+    }, onError: (err) {
+      print("getLinkStream error: $err");
+    });
+    ReceiveSharingIntent.getInitialText().then((String? value) {
+      setState(() {
+        _sharedText = value;
+        print("Shared: $_sharedText");
+      });
+    });
+  }
+
   List<Widget> buildQueue() {
     int count = -1;
     return widget.donwloadQueue.map((e) {
@@ -55,6 +79,25 @@ class _QueuePageState extends State<QueuePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_sharedText != null) {
+      String uri = _sharedText!;
+      _sharedText = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) => showModalBottomSheet(
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              context: context,
+              builder: (context) {
+                return AddModalPopup(
+                  uri: uri,
+                );
+              }).then((value) {
+            if (value != null) {
+              add(value);
+              print(widget.donwloadQueue);
+              setState(() {});
+            }
+          }));
+    }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(

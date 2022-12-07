@@ -5,7 +5,8 @@ import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Services/Youtube.dart';
 
 class AddModalPopup extends StatefulWidget {
-  AddModalPopup({super.key});
+  AddModalPopup({super.key, this.uri});
+  String? uri;
   YoutubeService ytServ = YoutubeService();
 
   @override
@@ -24,6 +25,42 @@ class _AddModalPopupState extends State<AddModalPopup> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.uri != null) {
+      _uriController.text = widget.uri!;
+      widget.uri = null;
+      print('Share Detected');
+      WidgetsBinding.instance.addPostFrameCallback(
+        (timeStamp) async {
+          print('Real Button Pressed');
+          if (_uriController.text != '') {
+            try {
+              setState(() {
+                downloadButton = Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: CircularProgressIndicator(),
+                );
+              });
+              vidInfo = await widget.ytServ
+                  .getVidInfo(_uriController.text)
+                  .then((value) {
+                setState(() {
+                  downloadButton = Icon(Icons.search);
+                });
+                return value;
+              });
+              print(vidInfo!.title);
+              setState(() {});
+            } catch (e) {
+              downloadButton = Icon(Icons.search);
+              GlobalMethods.snackBarError(e.toString(), context,
+                  isException: true);
+            }
+          } else {
+            GlobalMethods.snackBarError('Enter Link', context);
+          }
+        },
+      );
+    }
     return Container(
       decoration: const BoxDecoration(
           color: Colors.white,
@@ -52,7 +89,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
                               borderRadius: BorderRadius.circular(20)),
                           width: MediaQuery.of(context).size.width * 0.75,
                           height: 55,
-                          child: TextField(
+                          child: TextFormField(
                             controller: _uriController,
                             decoration: const InputDecoration(
                                 hintStyle: TextStyle(
