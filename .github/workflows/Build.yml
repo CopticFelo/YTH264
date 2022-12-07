@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo "${GITHUB_REF#refs/*/}"
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
@@ -24,10 +23,12 @@ jobs:
         run: flutter pub get
       - name: Build apk
         run: flutter build apk
+      - name: Set env
+        run: echo "RELEASE_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          name: "${GITHUB_REF#refs/*/}"
+          name: $RELEASE_NAME
           tag_name: ${{ github.ref }}
           prerelease: true
           generate_release_notes: true
