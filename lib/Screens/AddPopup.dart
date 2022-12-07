@@ -7,7 +7,6 @@ import 'package:YT_H264/Services/Youtube.dart';
 class AddModalPopup extends StatefulWidget {
   AddModalPopup({super.key});
   YoutubeService ytServ = YoutubeService();
-  YoutubeQueueObject? vidInfo;
 
   @override
   State<AddModalPopup> createState() => _AddModalPopupState();
@@ -16,6 +15,7 @@ class AddModalPopup extends StatefulWidget {
 class _AddModalPopupState extends State<AddModalPopup> {
   final TextEditingController _uriController = TextEditingController();
   Widget downloadButton = Icon(Icons.search);
+  YoutubeQueueObject? vidInfo;
 
   @override
   void dispose() {
@@ -85,7 +85,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
                                         child: CircularProgressIndicator(),
                                       );
                                     });
-                                    widget.vidInfo = await widget.ytServ
+                                    vidInfo = await widget.ytServ
                                         .getVidInfo(_uriController.text)
                                         .then((value) {
                                       setState(() {
@@ -93,7 +93,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
                                       });
                                       return value;
                                     });
-                                    print(widget.vidInfo!.title);
+                                    print(vidInfo!.title);
                                     setState(() {});
                                   } catch (e) {
                                     downloadButton = Icon(Icons.search);
@@ -115,7 +115,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
                   ),
                   const Divider(),
                   DownloadOptions(
-                    ytObj: widget.vidInfo,
+                    ytObj: vidInfo,
                   )
                 ],
               ),
