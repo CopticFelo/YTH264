@@ -50,13 +50,14 @@ class QueueWidget extends StatefulWidget {
 }
 
 class _QueueWidgetState extends State<QueueWidget> {
-  ReceivePort rc = ReceivePort();
+  ReceivePort? rc;
   SendPort? stopPort;
   bool isDownloading = false;
   Directory? downloads;
   Directory? temps;
 
   void download() async {
+    rc = ReceivePort();
     final storagePermissions = await Permission.storage.status;
     if (!storagePermissions.isGranted) {
       if (await Permission.storage.request().isDenied) {
@@ -82,7 +83,7 @@ class _QueueWidgetState extends State<QueueWidget> {
 
     Isolate downlaoder = await Isolate.spawn<Map<String, dynamic>>(
         DownloadManager.donwloadVideoFromYoutube, <String, dynamic>{
-      'port': rc.sendPort,
+      'port': rc!.sendPort,
       'ytObj': widget.ytobj,
       'temp': temps,
       'downloads': downloads,
@@ -94,7 +95,7 @@ class _QueueWidgetState extends State<QueueWidget> {
       });
       return value;
     });
-    rc.listen((data) {
+    rc!.listen((data) {
       if (data.length > 1) {
         setState(() {
           widget.downloadStatus = data[0];
@@ -105,7 +106,7 @@ class _QueueWidgetState extends State<QueueWidget> {
               isDownloading = false;
               downloadButtonWidth = 75;
             });
-            rc.close();
+            rc!.close();
           }
         });
         if (widget.ytobj.downloadType == DownloadType.AudioOnly &&
@@ -320,7 +321,7 @@ class _QueueWidgetState extends State<QueueWidget> {
                           if (!isDownloading) {
                             download();
                           } else {
-                            rc.close();
+                            rc!.close();
                             DownloadManager.stop(widget.downloadStatus,
                                 widget.ytobj, downloads!, temps!, stopPort);
                             setState(() {
