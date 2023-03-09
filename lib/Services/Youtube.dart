@@ -5,10 +5,15 @@ import 'package:http/http.dart' as http;
 class YoutubeService {
   final _serv = YoutubeExplode();
   Future<YoutubeQueueObject> getVidInfo(String uri) async {
+    // if original string contains with music. remove it
+    if (uri.contains('music.')) {
+      uri = uri.replaceFirst('music.', '');
+    }
     // String -> URI Obj
     Uri original = Uri.parse(uri);
     // Disect URI into Hostname and Path
-    var cleanUri = Uri.https(original.host, original.path);
+    var cleanUri =
+        Uri.https(original.host, original.path, original.queryParameters);
     // Get Video ID and Info
     var video = await _serv.videos.get(cleanUri);
     // Get All Available Streams
