@@ -5,10 +5,15 @@ import 'package:http/http.dart' as http;
 class YoutubeService {
   final _serv = YoutubeExplode();
   Future<YoutubeQueueObject> getVidInfo(String uri) async {
+    // String -> URI Obj
     Uri original = Uri.parse(uri);
+    // Disect URI into Hostname and Path
     var cleanUri = Uri.https(original.host, original.path);
+    // Get Video ID and Info
     var video = await _serv.videos.get(cleanUri);
+    // Get All Available Streams
     var vidStream = await _serv.videos.streamsClient.getManifest(video.id);
+    // Get Video Streams that are mp4
     Map<String, VideoOnlyStreamInfo> vids = {};
     for (var stream in vidStream.videoOnly) {
       if ((!vids.keys.contains(stream.qualityLabel)) ||
@@ -16,16 +21,19 @@ class YoutubeService {
         vids[stream.qualityLabel] = stream;
       }
     }
+    // Just get the highest quality one (Audio Quality doesn't really matter)
     var bestAudio = vidStream.audioOnly.withHighestBitrate();
     _serv.close();
 
     // get max res thumbnail
     String imgUri = "https://img.youtube.com/vi/${video.id}/maxresdefault.jpg";
+    // check if it even exist (Some videos don't have it)
     bool isImage = await validateImage(imgUri);
+    // if not or it is a YT Short just use 0.jpg
     if (uri.contains("shorts") || !isImage) {
       imgUri = "https://img.youtube.com/vi/${video.id}/0.jpg";
     }
-
+    // Return a queue obj with all the extracted info
     return YoutubeQueueObject(
         title: video.title,
         author: video.author,
@@ -34,6 +42,7 @@ class YoutubeService {
         thumbnail: imgUri);
   }
 
+  // Validates if there an image at this Url or not
   Future<bool> validateImage(String imageUrl) async {
     http.Response res;
     try {
@@ -47,6 +56,7 @@ class YoutubeService {
     return checkIfImage(data['content-type']);
   }
 
+  // Validates if content-type = image
   bool checkIfImage(String param) {
     if (param == 'image/jpeg' || param == 'image/png') {
       return true;

@@ -1,3 +1,5 @@
+// NOTE: THIS IS ONE OF THE MOST POORLY WRITTEN CODE I HAVE EVER WROTE
+// TODO: CLEAN QUEUEWIDGET.DART
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
@@ -9,14 +11,17 @@ import 'package:YT_H264/Services/DownloadManager.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+// Enum describing the varoius states of the download
 enum DownloadStatus { waiting, inQueue, downloading, converting, done, error }
 
+// It just gets the temp dir
 Future<Directory?> getTemp() async {
   Directory? dir;
   dir = await getTemporaryDirectory();
   return dir;
 }
 
+// It just gets the downloads dir
 Future<Directory?> getDownloads() async {
   Directory? dir;
   if (Platform.isIOS) {
@@ -33,11 +38,17 @@ Future<Directory?> getDownloads() async {
 }
 
 class QueueWidget extends StatefulWidget {
+  // The obj the widget is handling
   YoutubeQueueObject ytobj;
+  // the Status of the download for UI elements to keep track of
   DownloadStatus downloadStatus;
+  // download progress (if progress > 0: downloading)
   double progress = 0;
+  // index of the widget
   final index;
+  // function to remove from Download List
   Function rmov;
+
   QueueWidget(
       {super.key,
       required this.ytobj,
@@ -52,12 +63,15 @@ class QueueWidget extends StatefulWidget {
 class _QueueWidgetState extends State<QueueWidget> {
   ReceivePort? rc;
   SendPort? stopPort;
-  bool isDownloading = false;
+  bool isDownloading = false; // This shouldn't Exist
   Directory? downloads;
   Directory? temps;
 
+  // Function to start the download
   void download() async {
+    // Assigns the Recieveport fo the Isolate
     rc = ReceivePort();
+    // This is just makes sure read/write is permited
     final storagePermissions = await Permission.storage.status;
     if (!storagePermissions.isGranted) {
       if (await Permission.storage.request().isDenied) {
@@ -65,12 +79,15 @@ class _QueueWidgetState extends State<QueueWidget> {
         return;
       }
     }
+    // Status: Downloading
     widget.downloadStatus = DownloadStatus.downloading;
+    // Get the temp dir
     temps = await getTemp();
+    // Get the Downloads dir
     downloads = await getDownloads();
-    String audioDir;
-    String videoDir;
+    // Gets the title
     String title = widget.ytobj.title;
+    // Filters the title of non-allowed characters for filenames
     title = title
         .replaceAll(r'\', '')
         .replaceAll('/', '')
@@ -80,7 +97,7 @@ class _QueueWidgetState extends State<QueueWidget> {
         .replaceAll('<', '')
         .replaceAll('>', '')
         .replaceAll('|', '');
-
+    // Spawns an Isolate of the Function DownloadManager.downloadVideoFromYoutube
     Isolate downlaoder = await Isolate.spawn<Map<String, dynamic>>(
         DownloadManager.donwloadVideoFromYoutube, <String, dynamic>{
       'port': rc!.sendPort,
@@ -89,17 +106,29 @@ class _QueueWidgetState extends State<QueueWidget> {
       'downloads': downloads,
       // 'showError': errorCallback
     }).then((value) {
+      // Once the Isolate is spawned
+      // It sets the var isDownloading to true and shrinks the download button
+      // Why? I am not sure, the DownloadStatus var should be responsible for this crap
+      // oh well
+      // TODO: Refactor this Crap
       setState(() {
         isDownloading = true;
         downloadButtonWidth = 30;
       });
       return value;
     });
+    // Handling Messages between QueueWidget and downloader Isolate
     rc!.listen((data) {
+      // Unsafe way of handling messaging (I fixed it in another branch Gotta wait for it to be done)
       if (data.length > 1) {
+        // It means that it is a Download Progress Report (Which may or may not be done)
+        // data[0] is the Download State
+        // data[1] is the Download Progress
         setState(() {
+          // Set the Progress and Status Accordingly
           widget.downloadStatus = data[0];
           widget.progress = data[1];
+          // if Done (i.e not doing any converstion magic afterwards) Kill the Isolate, close rc and set the UI Up
           if (widget.downloadStatus == DownloadStatus.done) {
             downlaoder.kill();
             setState(() {
@@ -109,25 +138,35 @@ class _QueueWidgetState extends State<QueueWidget> {
             rc!.close();
           }
         });
+        // if DownloadStatus (recieved from data[0]) is converting and the media is audioonly
         if (widget.ytobj.downloadType == DownloadType.AudioOnly &&
             widget.downloadStatus == DownloadStatus.converting) {
+          // Convert it from .webm (in temp folder) to .mp3 (to be in downloads folder)
           DownloadManager.convertToMp3(
               downloads, title, widget.ytobj, refresh, temps!, context);
+          // Note: that Youtube Explode Muxed Video (i.e doesn't need conversion) only supports upto 720p, thus it is not used
+          // if DownloadStatus (recieved from data[0]) is converting and the media is Muxed (i.e Video + Audio)
         } else if (widget.ytobj.downloadType == DownloadType.Muxed &&
             widget.downloadStatus == DownloadStatus.converting) {
+          // Combine .webm (in temp folder) + mp4 (audioless, in temp folder) into .mp4 (with audio, to be in downloads folder)
           DownloadManager.mergeIntoMp4(
               temps, downloads, title, refresh, context);
         }
       } else {
+        // Means this is either the Sendport that will be used to
+        // Stop the Isolate (Download) from the Widget
+        // Or an Error
         if (data[0] is SendPort) {
           stopPort = data[0];
         } else {
+          // Displays a Snackbar
           GlobalMethods.snackBarError(data[0], context, isException: true);
         }
       }
     });
   }
 
+  // Used by external Functions to notify the widget that the download (Conversion) is done
   void refresh() {
     setState(() {
       widget.downloadStatus = DownloadStatus.done;
@@ -140,8 +179,10 @@ class _QueueWidgetState extends State<QueueWidget> {
     GlobalMethods.snackBarError(msg, context, isException: true);
   }
 
+  // Builds the status UI (i.e the UI next to the word Status: on the UI)
   Widget? buildStatus() {
     print('Status: ${widget.downloadStatus.toString()}');
+    // In case of downloading just show a Progress bar
     if (widget.downloadStatus == DownloadStatus.downloading) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -167,26 +208,32 @@ class _QueueWidgetState extends State<QueueWidget> {
           )
         ],
       );
+      // In case of conversion show a random download symbol (To be looked into)
     } else if (widget.downloadStatus == DownloadStatus.converting) {
       return const Icon(
         Icons.downloading,
         color: Colors.white,
       );
+      // In the case of the Download being done, show a done symbol
     } else if (widget.downloadStatus == DownloadStatus.done) {
       return const Icon(
         Icons.done,
         color: Colors.white,
       );
+      // Else show nothing (i.e when the user hasn't clicked the download button)
     } else {
       return null;
     }
   }
 
-  double? downloadButtonWidth;
+  double?
+      downloadButtonWidth; // This should be refactored into a map of some sort
   @override
   Widget build(BuildContext context) {
+    // default download button Width
     downloadButtonWidth = MediaQuery.of(context).size.width * 0.23;
     print('Refreshed');
+    // The Text to be displayed under the Video Title
     String type = '';
     if (widget.ytobj.downloadType == DownloadType.Muxed) {
       type = 'Video+Audio';
@@ -195,6 +242,7 @@ class _QueueWidgetState extends State<QueueWidget> {
     } else {
       type = 'Audio';
     }
+    // UI
     return Card(
       color: Colors.black,
       elevation: 2,
