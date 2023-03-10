@@ -7,10 +7,12 @@ enum DownloadType { Muxed, VideoOnly, AudioOnly }
 // The app can only download Videos from youtube for now (It may stay that way)
 abstract class QueueObject {
   final String title;
+  final String validTitle;
   final String author;
 
   QueueObject({
     required this.title,
+    required this.validTitle,
     required this.author,
   });
 }
@@ -40,6 +42,7 @@ class YoutubeQueueObject extends QueueObject {
   // Constructor
   YoutubeQueueObject(
       {required super.title,
+      required super.validTitle,
       required super.author,
       required this.videoOnlyStreams,
       required this.bestAudio,

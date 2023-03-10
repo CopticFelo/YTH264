@@ -27,21 +27,7 @@ class DownloadManager {
     final yt = YoutubeExplode();
     double progress = 0;
     String? vidDir, audioDir;
-    String title = args['ytObj'].title as String;
-    title = title
-        .replaceAll(r'\', '')
-        .replaceAll('/', '')
-        .replaceAll('*', '')
-        .replaceAll('?', '')
-        .replaceAll('"', '')
-        .replaceAll('<', '')
-        .replaceAll('>', '')
-        .replaceAll('|', '')
-        .replaceAll(':', '')
-        .replaceAll("'", '')
-        .replaceAll('"', '');
-    title = RemoveEmoji().removemoji(title);
-
+    String title = args['ytObj'].validTitle as String;
     if (args['ytObj'].downloadType == DownloadType.VideoOnly ||
         args['ytObj'].downloadType == DownloadType.Muxed) {
       try {
@@ -130,19 +116,6 @@ class DownloadManager {
       Function callBack,
       Directory temp,
       BuildContext context) async {
-    title = RemoveEmoji().removemoji(title);
-    title = title
-        .replaceAll(r'\', '')
-        .replaceAll('/', '')
-        .replaceAll('*', '')
-        .replaceAll('?', '')
-        .replaceAll('"', '')
-        .replaceAll('<', '')
-        .replaceAll('>', '')
-        .replaceAll('|', '')
-        .replaceAll(':', '')
-        .replaceAll("'", '')
-        .replaceAll('"', '');
     String imgPath = '${temp.path}/${title}.jpg';
     File? imgfile = await getImageAsFile(ytobj.thumbnail, imgPath);
     String audioDir =
@@ -180,19 +153,6 @@ class DownloadManager {
 
   static void mergeIntoMp4(Directory? temps, Directory? downloads, String title,
       Function callBack, BuildContext context) {
-    title = RemoveEmoji().removemoji(title);
-    title = title
-        .replaceAll(r'\', '')
-        .replaceAll('/', '')
-        .replaceAll('*', '')
-        .replaceAll('?', '')
-        .replaceAll('"', '')
-        .replaceAll('<', '')
-        .replaceAll('>', '')
-        .replaceAll('|', '')
-        .replaceAll(':', '')
-        .replaceAll("'", '')
-        .replaceAll('"', '');
     String audioDir = "'${temps!.path}/$title.webm'";
     String videoDir = "'${temps.path}/$title.mp4'";
     String outDir = "'${downloads!.path}/$title.mp4'";
@@ -231,28 +191,16 @@ class DownloadManager {
 
   static void stop(DownloadStatus ds, YoutubeQueueObject queueObject,
       Directory downloads, Directory temps, SendPort? stopper) async {
-    String fixedTitle = queueObject.title
-        .replaceAll(r'\', '')
-        .replaceAll('/', '')
-        .replaceAll('*', '')
-        .replaceAll('?', '')
-        .replaceAll('"', '')
-        .replaceAll('<', '')
-        .replaceAll('>', '')
-        .replaceAll('|', '')
-        .replaceAll(':', '')
-        .replaceAll("'", '')
-        .replaceAll('"', '');
     if (ds == DownloadStatus.downloading) {
       stopper!.send(null);
     } else {
       FFmpegKit.cancel();
     }
     if (queueObject.downloadType == DownloadType.AudioOnly) {
-      String path = '${downloads.path}/$fixedTitle.webm';
+      String path = '${downloads.path}/$queueObject.validTitle.webm';
       File file = File(path);
 
-      String outpath = '${downloads.path}/$fixedTitle.mp3';
+      String outpath = '${downloads.path}/$queueObject.validTitle.mp3';
       File outfile = File(outpath);
 
       try {
@@ -260,20 +208,20 @@ class DownloadManager {
         await outfile.delete();
       } catch (e) {}
     } else if (queueObject.downloadType == DownloadType.VideoOnly) {
-      String path = '${downloads.path}/$fixedTitle.mp4';
+      String path = '${downloads.path}/$queueObject.validTitle.mp4';
       File file = File(path);
 
       try {
         await file.delete();
       } catch (e) {}
     } else {
-      String pathToVid = '${temps.path}/$fixedTitle.mp4';
+      String pathToVid = '${temps.path}/$queueObject.validTitle.mp4';
       File vidfile = File(pathToVid);
 
-      String pathToAud = '${temps.path}/$fixedTitle.webm';
+      String pathToAud = '${temps.path}/$queueObject.validTitle.webm';
       File audfile = File(pathToAud);
 
-      String pathToOut = '${downloads.path}/$fixedTitle.mp4';
+      String pathToOut = '${downloads.path}/$queueObject.validTitle.mp4';
       File outfile = File(pathToOut);
 
       try {

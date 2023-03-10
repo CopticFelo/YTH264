@@ -1,4 +1,5 @@
 import 'package:YT_H264/Services/QueueObject.dart';
+import 'package:remove_emoji/remove_emoji.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,9 +39,24 @@ class YoutubeService {
     if (uri.contains("shorts") || !isImage) {
       imgUri = "https://img.youtube.com/vi/${video.id}/0.jpg";
     }
+    // Make a title that doesn't have un-allowed (& Emojis) characters for filenames
+    String validName = video.title
+        .replaceAll(r'\', '')
+        .replaceAll('/', '')
+        .replaceAll('*', '')
+        .replaceAll('?', '')
+        .replaceAll('"', '')
+        .replaceAll('<', '')
+        .replaceAll('>', '')
+        .replaceAll('|', '')
+        .replaceAll(':', '')
+        .replaceAll("'", '')
+        .replaceAll('"', '');
+    validName = RemoveEmoji().removemoji(validName);
     // Return a queue obj with all the extracted info
     return YoutubeQueueObject(
         title: video.title,
+        validTitle: validName,
         author: video.author,
         videoOnlyStreams: vids,
         bestAudio: bestAudio,
