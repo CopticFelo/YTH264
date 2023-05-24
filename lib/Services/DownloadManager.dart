@@ -152,16 +152,19 @@ class DownloadManager {
       if (!ReturnCode.isSuccess(returnCode) &&
           !ReturnCode.isCancel(returnCode)) {
         GlobalMethods.snackBarError(session.getOutput().toString(), context);
+        clean(ytobj, downloads, temp, true);
       }
 
       File old = File(audioDir);
 
-      try {
-        await old.delete();
-      } catch (e) {}
-      if (imgfile != null) {
-        await imgfile.delete();
-      }
+      // try {
+      //   await old.delete();
+      // } catch (e) {}
+      // if (imgfile != null) {
+      //   await imgfile.delete();
+      // }
+
+      clean(ytobj, downloads, temp, false);
 
       callBack();
 
@@ -197,16 +200,20 @@ class DownloadManager {
 
     FFmpegKit.executeWithArgumentsAsync(args, (session) async {
       final returnCode = await session.getReturnCode();
+
       if (!ReturnCode.isSuccess(returnCode) &&
           !ReturnCode.isCancel(returnCode)) {
         String? msg = await session.getOutput();
         GlobalMethods.snackBarError(msg!, context);
+        clean(ytobj, downloads, temps, true);
       }
+
       print(session.getOutput());
-      File oldAudio = File(audioDir);
-      await oldAudio.delete();
-      File oldVideo = File(videoDir);
-      await oldVideo.delete();
+      // File oldAudio = File(audioDir);
+      // await oldAudio.delete();
+      // File oldVideo = File(videoDir);
+      // await oldVideo.delete();
+      clean(ytobj, downloads, temps, false);
       callBack();
     }, ((log) {
       print(log.getMessage());
@@ -239,13 +246,14 @@ class DownloadManager {
   static void clean(YoutubeQueueObject queueObject, Directory downloads,
       Directory temps, bool cleanOutFile) async {
     if (queueObject.downloadType == DownloadType.AudioOnly) {
-      String path = '${downloads.path}/$queueObject.validTitle.webm';
+      String path =
+          '${downloads.path}/${queueObject.validTitle}.${queueObject.bestAudio.container.name}';
       File file = File(path);
 
       String imgPath = '${temps.path}/${queueObject.validTitle}.jpg';
       File imgFile = File(imgPath);
 
-      String outpath = '${downloads.path}/$queueObject.validTitle.mp3';
+      String outpath = '${downloads.path}/${queueObject.validTitle}.mp3';
       File outfile = File(outpath);
 
       try {
@@ -257,20 +265,20 @@ class DownloadManager {
       } catch (e) {}
     } else if (queueObject.downloadType == DownloadType.VideoOnly &&
         cleanOutFile) {
-      String path = '${downloads.path}/$queueObject.validTitle.mp4';
+      String path = '${downloads.path}/${queueObject.validTitle}.mp4';
       File file = File(path);
 
       try {
         await file.delete();
       } catch (e) {}
     } else {
-      String pathToVid = '${temps.path}/$queueObject.validTitle.mp4';
+      String pathToVid = '${temps.path}/${queueObject.validTitle}.mp4';
       File vidfile = File(pathToVid);
 
-      String pathToAud = '${temps.path}/$queueObject.validTitle.webm';
+      String pathToAud = '${temps.path}/${queueObject.validTitle}.webm';
       File audfile = File(pathToAud);
 
-      String pathToOut = '${downloads.path}/$queueObject.validTitle.mp4';
+      String pathToOut = '${downloads.path}/${queueObject.validTitle}.mp4';
       File outfile = File(pathToOut);
 
       try {
