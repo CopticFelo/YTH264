@@ -7,6 +7,11 @@ class GlobalMethods {
   // if it's an Exception make the snackbar red.
   static void snackBarError(String msg, BuildContext context,
       {bool isException = false}) {
+    if (isException) {
+      print('\x1B[31m$msg\x1B[0m');
+    } else {
+      print('\x1B[31m$msg\x1B[0m');
+    }
     Flushbar(
       icon: Icon(
         Icons.error,
