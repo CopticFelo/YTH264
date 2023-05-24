@@ -21,13 +21,12 @@ class DownloadManager {
     rc.listen(((message) {
       Isolate.exit();
     }));
-
-    // TODO: Android Permissions
     print('Starting Download');
     final yt = YoutubeExplode();
     double progress = 0;
     String? vidDir, audioDir;
     String title = args['ytObj'].validTitle as String;
+    // print(title);
     if (args['ytObj'].downloadType == DownloadType.VideoOnly ||
         args['ytObj'].downloadType == DownloadType.Muxed) {
       try {
@@ -76,7 +75,6 @@ class DownloadManager {
         } else {
           directory = args['temp'];
         }
-
         fileDir =
             '${directory!.path}/$title.${args['ytObj'].bestAudio.container.name}';
         audioDir = fileDir;
@@ -109,56 +107,95 @@ class DownloadManager {
     Isolate.exit();
   }
 
-  static void convertToMp3(
-      Directory? downloads,
-      String title,
-      YoutubeQueueObject ytobj,
-      Function callBack,
-      Directory temp,
-      BuildContext context) async {
-    String imgPath = '${temp.path}/${title}.jpg';
+  static void convertToMp3(Directory? downloads, YoutubeQueueObject ytobj,
+      Function callBack, Directory temp, BuildContext context) async {
+    String imgPath = '${temp.path}/${ytobj.validTitle}.jpg';
+
     File? imgfile = await getImageAsFile(ytobj.thumbnail, imgPath);
+
     String audioDir =
-        '"${downloads!.path}/$title.${ytobj.bestAudio.container.name}"';
-    String command = '';
+        "${downloads!.path}/${ytobj.validTitle}.${ytobj.bestAudio.container.name}";
+
+    String author = ytobj.author;
+
+    String title = ytobj.title;
+
+    String out = '${downloads.path}/${ytobj.validTitle}.mp3';
+
+    List<String> args = [];
 
     if (imgfile != null) {
-      command =
-          '-y -i $audioDir -i "$imgPath" -map 0 -map 1 -metadata artist="${ytobj.author}" -metadata title="${ytobj.title}" "${downloads.path}/$title.mp3"';
+      args = [
+        "-y",
+        '-i',
+        '$audioDir',
+        '-i',
+        '$imgPath',
+        '-map',
+        '0',
+        '-map',
+        '1',
+        '-metadata',
+        'artist=$author',
+        '-metadata',
+        'title=$title',
+        '$out'
+      ];
     } else {
-      command = '-y -i $audioDir "${downloads.path}/$title.mp3"';
+      args = ['-y', '-i', '$audioDir', '$out'];
     }
 
-    print(command);
-    FFmpegKit.executeAsync(command, (session) async {
+    print(args);
+    FFmpegKit.executeWithArgumentsAsync(args, (session) async {
       final returnCode = await session.getReturnCode();
+
       if (!ReturnCode.isSuccess(returnCode) &&
           !ReturnCode.isCancel(returnCode)) {
         GlobalMethods.snackBarError(session.getOutput().toString(), context);
       }
-      File old = File(audioDir.replaceAll("'", ''));
+
+      File old = File(audioDir);
+
       try {
         await old.delete();
       } catch (e) {}
       if (imgfile != null) {
         await imgfile.delete();
       }
-      // print(session.)
+
       callBack();
+
       return;
     }, ((log) {
       print(log.getMessage());
     }));
   }
 
-  static void mergeIntoMp4(Directory? temps, Directory? downloads, String title,
-      Function callBack, BuildContext context) {
-    String audioDir = "'${temps!.path}/$title.webm'";
-    String videoDir = "'${temps.path}/$title.mp4'";
-    String outDir = "'${downloads!.path}/$title.mp4'";
-    FFmpegKit.executeAsync(
-        '-y -i $videoDir -i $audioDir -c:v copy -c:a aac $outDir',
-        (session) async {
+  static void mergeIntoMp4(Directory? temps, Directory? downloads,
+      YoutubeQueueObject ytobj, Function callBack, BuildContext context) {
+    String audioDir =
+        "${temps!.path}/${ytobj.validTitle}.${ytobj.bestAudio.container.name}";
+
+    String videoDir = "${temps.path}/${ytobj.validTitle}.mp4";
+
+    String outDir = "${downloads!.path}/${ytobj.validTitle}.mp4";
+
+    print("${temps.path}");
+
+    List<String> args = [
+      '-y',
+      '-i',
+      '$videoDir',
+      '-i',
+      '$audioDir',
+      '-c:v',
+      'copy',
+      '-c:a',
+      'aac',
+      '$outDir'
+    ];
+
+    FFmpegKit.executeWithArgumentsAsync(args, (session) async {
       final returnCode = await session.getReturnCode();
       if (!ReturnCode.isSuccess(returnCode) &&
           !ReturnCode.isCancel(returnCode)) {
@@ -166,9 +203,9 @@ class DownloadManager {
         GlobalMethods.snackBarError(msg!, context);
       }
       print(session.getOutput());
-      File oldAudio = File(audioDir.replaceAll("'", ''));
+      File oldAudio = File(audioDir);
       await oldAudio.delete();
-      File oldVideo = File(videoDir.replaceAll("'", ''));
+      File oldVideo = File(videoDir);
       await oldVideo.delete();
       callBack();
     }, ((log) {
@@ -196,18 +233,30 @@ class DownloadManager {
     } else {
       FFmpegKit.cancel();
     }
+    clean(queueObject, downloads, temps, true);
+  }
+
+  static void clean(YoutubeQueueObject queueObject, Directory downloads,
+      Directory temps, bool cleanOutFile) async {
     if (queueObject.downloadType == DownloadType.AudioOnly) {
       String path = '${downloads.path}/$queueObject.validTitle.webm';
       File file = File(path);
+
+      String imgPath = '${temps.path}/${queueObject.validTitle}.jpg';
+      File imgFile = File(imgPath);
 
       String outpath = '${downloads.path}/$queueObject.validTitle.mp3';
       File outfile = File(outpath);
 
       try {
         await file.delete();
-        await outfile.delete();
+        await imgFile.delete();
+        if (cleanOutFile) {
+          await outfile.delete();
+        }
       } catch (e) {}
-    } else if (queueObject.downloadType == DownloadType.VideoOnly) {
+    } else if (queueObject.downloadType == DownloadType.VideoOnly &&
+        cleanOutFile) {
       String path = '${downloads.path}/$queueObject.validTitle.mp4';
       File file = File(path);
 
@@ -227,7 +276,9 @@ class DownloadManager {
       try {
         await vidfile.delete();
         await audfile.delete();
-        await outfile.delete();
+        if (cleanOutFile) {
+          await outfile.delete();
+        }
       } catch (e) {}
     }
   }

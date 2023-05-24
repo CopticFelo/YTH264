@@ -141,16 +141,16 @@ class _QueueWidgetState extends State<QueueWidget> {
         // if DownloadStatus (recieved from data[0]) is converting and the media is audioonly
         if (widget.ytobj.downloadType == DownloadType.AudioOnly &&
             widget.downloadStatus == DownloadStatus.converting) {
-          // Convert it from .webm (in temp folder) to .mp3 (to be in downloads folder)
-          DownloadManager.convertToMp3(downloads, widget.ytobj.validTitle,
-              widget.ytobj, refresh, temps!, context);
+          // Convert it from .webm (~in temp folder~) to .mp3 (to be in downloads folder)
+          DownloadManager.convertToMp3(
+              downloads, widget.ytobj, refresh, temps!, context);
           // Note: that Youtube Explode Muxed Video (i.e doesn't need conversion) only supports upto 720p, thus it is not used
           // if DownloadStatus (recieved from data[0]) is converting and the media is Muxed (i.e Video + Audio)
         } else if (widget.ytobj.downloadType == DownloadType.Muxed &&
             widget.downloadStatus == DownloadStatus.converting) {
           // Combine .webm (in temp folder) + mp4 (audioless, in temp folder) into .mp4 (with audio, to be in downloads folder)
           DownloadManager.mergeIntoMp4(
-              temps, downloads, widget.ytobj.validTitle, refresh, context);
+              temps, downloads, widget.ytobj, refresh, context);
         }
       } else {
         // Means this is either the Sendport that will be used to

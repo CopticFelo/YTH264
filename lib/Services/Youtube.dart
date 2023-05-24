@@ -41,17 +41,15 @@ class YoutubeService {
     }
     // Make a title that doesn't have un-allowed (& Emojis) characters for filenames
     String validName = video.title
-        .replaceAll(r'\', '')
+        // .replaceAll(r'\', '')
         .replaceAll('/', '')
         .replaceAll('*', '')
         .replaceAll('?', '')
-        .replaceAll('"', '')
         .replaceAll('<', '')
         .replaceAll('>', '')
         .replaceAll('|', '')
-        .replaceAll(':', '')
-        .replaceAll("'", '')
-        .replaceAll('"', '');
+        .replaceAll(':', '');
+    print(validName + " Before ");
     validName = RemoveEmoji().removemoji(validName);
     // Return a queue obj with all the extracted info
     return YoutubeQueueObject(
