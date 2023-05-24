@@ -70,11 +70,9 @@ class DownloadManager {
         var count = 0;
         String? fileDir;
         Directory? directory;
-        if (args['ytObj'].downloadType == DownloadType.AudioOnly) {
-          directory = args['downloads'];
-        } else {
-          directory = args['temp'];
-        }
+
+        directory = args['temp'];
+
         fileDir =
             '${directory!.path}/$title.${args['ytObj'].bestAudio.container.name}';
         audioDir = fileDir;
@@ -114,13 +112,13 @@ class DownloadManager {
     File? imgfile = await getImageAsFile(ytobj.thumbnail, imgPath);
 
     String audioDir =
-        "${downloads!.path}/${ytobj.validTitle}.${ytobj.bestAudio.container.name}";
+        "${temp.path}/${ytobj.validTitle}.${ytobj.bestAudio.container.name}";
 
     String author = ytobj.author;
 
     String title = ytobj.title;
 
-    String out = '${downloads.path}/${ytobj.validTitle}.mp3';
+    String out = '${downloads!.path}/${ytobj.validTitle}.mp3';
 
     List<String> args = [];
 
