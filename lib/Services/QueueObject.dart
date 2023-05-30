@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 // Enum describing the type of the Requested download
@@ -22,7 +24,7 @@ class YoutubeQueueObject extends QueueObject {
   // A map of VideoOnly Download Streams
   final Map<String, VideoOnlyStreamInfo> videoOnlyStreams;
   // AudioOnlyStreamInfo Object containing the best Audio Stream
-  // Audio Quality isn't important for me, So just get the best one
+  // Audio Quality isn't important imo, So just get the best one
   final AudioOnlyStreamInfo bestAudio;
   // Video Thumbnail URL
   final String thumbnail;
@@ -47,4 +49,55 @@ class YoutubeQueueObject extends QueueObject {
       required this.videoOnlyStreams,
       required this.bestAudio,
       required this.thumbnail});
+
+  YoutubeQueueObject.complete({
+    required super.title,
+    required super.validTitle,
+    required super.author,
+    required this.videoOnlyStreams,
+    required this.bestAudio,
+    required this.thumbnail,
+    required this.downloadType,
+    this.stream,
+  });
+
+  factory YoutubeQueueObject.fromJson(Map<String, dynamic> jsonData) {
+    Map<String, VideoOnlyStreamInfo> vd =
+        (jsonData['videoOnlyStreams'] as Map<String, dynamic>).map(
+            (key, value) => MapEntry(key, VideoOnlyStreamInfo.fromJson(value)));
+    return YoutubeQueueObject.complete(
+        title: jsonData['title'],
+        validTitle: jsonData['validTitle'],
+        author: jsonData['author'],
+        videoOnlyStreams: vd,
+        bestAudio: AudioOnlyStreamInfo.fromJson(jsonData['bestAudio']),
+        thumbnail: jsonData['thumbnail'],
+        downloadType: DownloadType.values[jsonData['downloadType']],
+        stream: jsonData['stream'] != null
+            ? VideoOnlyStreamInfo.fromJson(jsonData['stream'])
+            : null);
+  }
+
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> mp = {
+      'title': super.title,
+      'validTitle': super.validTitle,
+      'author': super.author,
+      'stream': this.stream,
+      'thumbnail': this.thumbnail,
+      "videoOnlyStreams": this.videoOnlyStreams,
+      'bestAudio': this.bestAudio,
+      'downloadType': this.downloadType.index
+    };
+    // print(jsonEncode(mp));
+    return mp;
+  }
+
+  static String encode(List<YoutubeQueueObject> ytObjs) => jsonEncode(
+        ytObjs.map<Map<String, dynamic>>((obj) => obj.toMap()).toList(),
+      );
+  static List<YoutubeQueueObject> decode(String ytObjs) =>
+      (jsonDecode(ytObjs) as List<dynamic>)
+          .map<YoutubeQueueObject>((item) => YoutubeQueueObject.fromJson(item))
+          .toList();
 }

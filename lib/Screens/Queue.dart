@@ -7,12 +7,13 @@ import 'package:YT_H264/Screens/AddPopup.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Widgets/QueueWidget.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QueuePage extends StatefulWidget {
   GlobalKey<AnimatedListState> listkey = GlobalKey<AnimatedListState>();
   QueuePage({super.key});
 
-  List<QueueObject> donwloadQueue = [];
+  List<YoutubeQueueObject> donwloadQueue = [];
 
   @override
   State<QueuePage> createState() => _QueuePageState();
@@ -38,6 +39,7 @@ class _QueuePageState extends State<QueuePage> {
         print("Shared: $_sharedText");
       });
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) => loadList());
   }
 
   List<Widget> buildQueue() {
@@ -69,12 +71,40 @@ class _QueuePageState extends State<QueuePage> {
             )),
         duration: Duration(milliseconds: 100));
     widget.donwloadQueue.removeAt(index);
+    saveList();
   }
 
-  void add(QueueObject queueObject) {
-    widget.listkey.currentState!.insertItem(widget.donwloadQueue.length,
-        duration: Duration(milliseconds: 100));
-    widget.donwloadQueue.add(queueObject);
+  void add(QueueObject queueObject, {bool fromJson = false, int? index}) {
+    Duration time = Duration(milliseconds: fromJson ? 0 : 100);
+    widget.listkey.currentState!.insertItem(
+        index != null ? index : widget.donwloadQueue.length,
+        duration: time);
+    final ytobj = queueObject as YoutubeQueueObject;
+    if (!fromJson) {
+      widget.donwloadQueue.add(queueObject as YoutubeQueueObject);
+      saveList();
+    }
+  }
+
+  void saveList() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String encodedData = YoutubeQueueObject.encode(widget.donwloadQueue);
+    await prefs.setString('Queue', encodedData);
+  }
+
+  void loadList() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? jsonString = await prefs.getString('Queue');
+    print(jsonString);
+    if (jsonString != null) {
+      widget.donwloadQueue = YoutubeQueueObject.decode(jsonString);
+      print(widget.donwloadQueue.length);
+      int index = 0;
+      for (var element in widget.donwloadQueue) {
+        add(element, fromJson: true, index: index);
+        index++;
+      }
+    }
   }
 
   @override
@@ -103,7 +133,7 @@ class _QueuePageState extends State<QueuePage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text('Queue',
+        title: Text('YT-H264',
             style: TextStyle(
                 color: Colors.black,
                 fontFamily: 'Helvetica',
@@ -139,7 +169,7 @@ class _QueuePageState extends State<QueuePage> {
                   }
                 }),
                 child: Center(
-                  child: Text('+ Add',
+                  child: Text('+',
                       style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Helvetica',
@@ -154,58 +184,25 @@ class _QueuePageState extends State<QueuePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              height: 43,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color: Colors.black, borderRadius: BorderRadius.circular(12)),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.download,
-                      color: Colors.white,
-                      size: MediaQuery.of(context).size.height * 0.025,
-                    ),
-                    Text('Download All',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Helvetica',
-                            fontWeight: FontWeight.bold,
-                            fontSize:
-                                MediaQuery.of(context).textScaleFactor * 25))
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            Expanded(
-              child: AnimatedList(
-                key: widget.listkey,
-                shrinkWrap: true,
-                itemBuilder: (context, index, animation) {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(-1, 0),
-                      end: Offset(0, 0),
-                    ).animate(animation),
-                    child: QueueWidget(
-                        ytobj:
-                            widget.donwloadQueue[index] as YoutubeQueueObject,
-                        downloadStatus: DownloadStatus.waiting,
-                        index: index,
-                        rmov: delete),
-                  );
-                },
-              ),
-            )
-          ],
+        child: Expanded(
+          child: AnimatedList(
+            key: widget.listkey,
+            shrinkWrap: true,
+            itemBuilder: (context, index, animation) {
+              print(index);
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(-1, 0),
+                  end: Offset(0, 0),
+                ).animate(animation),
+                child: QueueWidget(
+                    ytobj: widget.donwloadQueue[index] as YoutubeQueueObject,
+                    downloadStatus: DownloadStatus.waiting,
+                    index: index,
+                    rmov: delete),
+              );
+            },
+          ),
         ),
       ),
     );

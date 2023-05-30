@@ -248,7 +248,7 @@ class _QueueWidgetState extends State<QueueWidget> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -272,148 +272,164 @@ class _QueueWidgetState extends State<QueueWidget> {
             Flexible(
               flex: 2,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                        child: Text(
-                      widget.ytobj.title,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: const TextStyle(color: Colors.white),
-                    )),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                          child: Text(
+                        widget.ytobj.title,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        style: const TextStyle(color: Colors.white),
+                      )),
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(type,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Helvetica',
-                              fontWeight: FontWeight.bold,
-                              fontSize:
-                                  MediaQuery.of(context).textScaleFactor * 10)),
-                      Row(
-                        children: [
-                          TextButton(
-                            style: ButtonStyle(
-                              minimumSize: MaterialStateProperty.all(Size.zero),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              padding: MaterialStateProperty.all(
-                                  const EdgeInsets.all(6.0)),
-                              shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20))),
-                              backgroundColor: MaterialStateProperty.all(
-                                  Theme.of(context).colorScheme.onBackground),
-                              overlayColor:
-                                  MaterialStateProperty.all(Colors.grey),
-                            ),
-                            onPressed: () => widget.rmov(widget.index),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.delete,
-                                  color: Colors.white,
-                                  size: 12,
-                                ),
-                                Text(
-                                  'Delete',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Helvetica',
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: MediaQuery.of(context)
-                                              .textScaleFactor *
-                                          12),
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            'Status:',
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(type,
                             style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Helvetica',
                                 fontWeight: FontWeight.bold,
-                                fontSize: 10),
-                          ),
-                          buildStatus() ?? Container(),
-                        ],
-                      ),
-                      TextButton(
-                        style: ButtonStyle(
-                          minimumSize: MaterialStateProperty.all(Size.zero),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          padding: MaterialStateProperty.all(
-                              const EdgeInsets.all(6.0)),
-                          shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20))),
-                          backgroundColor:
-                              MaterialStateProperty.all(Colors.white),
-                          overlayColor: MaterialStateProperty.all(Colors.grey),
-                        ),
-                        onPressed: () {
-                          if (!isDownloading) {
-                            download();
-                          } else {
-                            rc!.close();
-                            DownloadManager.stop(widget.downloadStatus,
-                                widget.ytobj, downloads!, temps!, stopPort);
-                            setState(() {
-                              isDownloading = false;
-                              downloadButtonWidth = 75;
-                              widget.downloadStatus = DownloadStatus.waiting;
-                            });
-                          }
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(microseconds: 1000),
-                          curve: Curves.easeIn,
-                          // width: downloadButtonWidth,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20)),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Icon(
-                                  isDownloading ? Icons.cancel : Icons.download,
-                                  color: Colors.black,
-                                  size: 12,
-                                ),
+                                fontSize:
+                                    MediaQuery.of(context).textScaleFactor *
+                                        10)),
+                        Row(
+                          children: [
+                            TextButton(
+                              style: ButtonStyle(
+                                minimumSize:
+                                    MaterialStateProperty.all(Size.zero),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: MaterialStateProperty.all(
+                                    const EdgeInsets.all(6.0)),
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20))),
+                                backgroundColor: MaterialStateProperty.all(
+                                    Theme.of(context).colorScheme.onBackground),
+                                overlayColor:
+                                    MaterialStateProperty.all(Colors.grey),
                               ),
-                              Visibility(
-                                visible: !isDownloading,
-                                child: Text(
-                                  'Download',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Helvetica',
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: MediaQuery.of(context)
-                                              .textScaleFactor *
-                                          12),
-                                ),
-                              )
-                            ],
-                          ),
+                              onPressed: () => widget.rmov(widget.index),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                    size: 10,
+                                  ),
+                                  Text(
+                                    'Delete',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Helvetica',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: MediaQuery.of(context)
+                                                .textScaleFactor *
+                                            10),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
                         ),
-                      )
-                    ],
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Text(
+                              'Status:',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Helvetica',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10),
+                            ),
+                            buildStatus() ?? Container(),
+                          ],
+                        ),
+                        TextButton(
+                          style: ButtonStyle(
+                            minimumSize: MaterialStateProperty.all(Size.zero),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            padding: MaterialStateProperty.all(
+                                const EdgeInsets.all(4.0)),
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20))),
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.white),
+                            overlayColor:
+                                MaterialStateProperty.all(Colors.grey),
+                          ),
+                          onPressed: () {
+                            if (!isDownloading) {
+                              download();
+                            } else {
+                              rc!.close();
+                              DownloadManager.stop(widget.downloadStatus,
+                                  widget.ytobj, downloads!, temps!, stopPort);
+                              setState(() {
+                                isDownloading = false;
+                                downloadButtonWidth = 75;
+                                widget.downloadStatus = DownloadStatus.waiting;
+                              });
+                            }
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(microseconds: 1000),
+                            curve: Curves.easeIn,
+                            // width: downloadButtonWidth,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20)),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Center(
+                                  child: Icon(
+                                    isDownloading
+                                        ? Icons.cancel
+                                        : Icons.download,
+                                    color: Colors.black,
+                                    size: 10,
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: !isDownloading,
+                                  child: Text(
+                                    'Download',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Helvetica',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: MediaQuery.of(context)
+                                                .textScaleFactor *
+                                            10),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   )
                 ],
               ),
