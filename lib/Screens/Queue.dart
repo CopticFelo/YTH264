@@ -2,10 +2,12 @@
 
 import 'dart:async';
 
+import 'package:YT_H264/Screens/EmptyList.dart';
 import 'package:flutter/material.dart';
 import 'package:YT_H264/Screens/AddPopup.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Widgets/QueueWidget.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,16 +74,16 @@ class _QueuePageState extends State<QueuePage> {
         duration: Duration(milliseconds: 100));
     widget.donwloadQueue.removeAt(index);
     saveList();
+    setState(() {});
   }
 
   void add(QueueObject queueObject, {bool fromJson = false, int? index}) {
     Duration time = Duration(milliseconds: fromJson ? 0 : 100);
     widget.listkey.currentState!.insertItem(
-        index != null ? index : widget.donwloadQueue.length,
+        index != null ? index : widget.donwloadQueue.length - 1,
         duration: time);
     final ytobj = queueObject as YoutubeQueueObject;
     if (!fromJson) {
-      widget.donwloadQueue.add(queueObject as YoutubeQueueObject);
       saveList();
     }
   }
@@ -93,13 +95,27 @@ class _QueuePageState extends State<QueuePage> {
   }
 
   void loadList() async {
+    await Future.delayed(Duration(milliseconds: 500));
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? jsonString = await prefs.getString('Queue');
     print(jsonString);
     if (jsonString != null) {
       widget.donwloadQueue = YoutubeQueueObject.decode(jsonString);
-      print(widget.donwloadQueue.length);
+      // to init the animated list
+      if (widget.donwloadQueue.isNotEmpty) {
+        setState(() {});
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          int index = 0;
+          for (var element in widget.donwloadQueue) {
+            add(element, fromJson: true, index: index);
+            index++;
+          }
+        });
+        return;
+      }
+
       int index = 0;
+      print(widget.donwloadQueue.length);
       for (var element in widget.donwloadQueue) {
         add(element, fromJson: true, index: index);
         index++;
@@ -163,6 +179,16 @@ class _QueuePageState extends State<QueuePage> {
                       return AddModalPopup();
                     }).then((value) {
                   if (value != null) {
+                    if (widget.donwloadQueue.isEmpty) {
+                      setState(() {
+                        widget.donwloadQueue.add(value as YoutubeQueueObject);
+                      });
+                      SchedulerBinding.instance.addPostFrameCallback((_) {
+                        add(value);
+                      });
+                      return;
+                    }
+                    widget.donwloadQueue.add(value as YoutubeQueueObject);
                     add(value);
                     print(widget.donwloadQueue);
                     setState(() {});
@@ -184,26 +210,26 @@ class _QueuePageState extends State<QueuePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: Expanded(
-          child: AnimatedList(
-            key: widget.listkey,
-            shrinkWrap: true,
-            itemBuilder: (context, index, animation) {
-              print(index);
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset(0, 0),
-                ).animate(animation),
-                child: QueueWidget(
-                    ytobj: widget.donwloadQueue[index] as YoutubeQueueObject,
-                    downloadStatus: DownloadStatus.waiting,
-                    index: index,
-                    rmov: delete),
-              );
-            },
-          ),
-        ),
+        child: widget.donwloadQueue.length == 0
+            ? EmptyList()
+            : AnimatedList(
+                key: widget.listkey,
+                shrinkWrap: true,
+                itemBuilder: (context, index, animation) {
+                  print(index);
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(-1, 0),
+                      end: Offset(0, 0),
+                    ).animate(animation),
+                    child: QueueWidget(
+                        ytobj: widget.donwloadQueue[index],
+                        downloadStatus: DownloadStatus.waiting,
+                        index: index,
+                        rmov: delete),
+                  );
+                },
+              ),
       ),
     );
   }
