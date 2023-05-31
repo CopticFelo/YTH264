@@ -93,9 +93,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
                             controller: _uriController,
                             decoration: const InputDecoration(
                                 hintStyle: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Helvetica',
-                                    fontSize: 16),
+                                    color: Colors.black, fontSize: 16),
                                 hintText: 'Enter Youtube URL',
                                 border: OutlineInputBorder()),
                           )),

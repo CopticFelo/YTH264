@@ -8,6 +8,7 @@ import 'package:YT_H264/Screens/AddPopup.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Widgets/QueueWidget.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -136,8 +137,21 @@ class _QueuePageState extends State<QueuePage> {
                 return AddModalPopup(
                   uri: uri,
                 );
-              }).then((value) {
+              }).then((value) async {
             if (value != null) {
+              final SharedPreferences prefs =
+                  await SharedPreferences.getInstance();
+              final String? jsonString = await prefs.getString('Queue');
+              if (widget.donwloadQueue.isEmpty && jsonString == null) {
+                setState(() {
+                  widget.donwloadQueue.add(value as YoutubeQueueObject);
+                });
+                SchedulerBinding.instance.addPostFrameCallback((_) {
+                  add(value);
+                });
+                return;
+              }
+              widget.donwloadQueue.add(value as YoutubeQueueObject);
               add(value);
               print(widget.donwloadQueue);
               setState(() {});
@@ -150,11 +164,11 @@ class _QueuePageState extends State<QueuePage> {
         centerTitle: true,
         elevation: 0,
         title: Text('YT-H264',
-            style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Helvetica',
-                fontWeight: FontWeight.bold,
-                fontSize: MediaQuery.of(context).size.height * 0.028)),
+            style: GoogleFonts.lato(
+                textStyle: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: MediaQuery.of(context).size.height * 0.028))),
         actions: [
           Padding(
             padding: EdgeInsets.fromLTRB(
@@ -198,7 +212,7 @@ class _QueuePageState extends State<QueuePage> {
                   child: Text('+',
                       style: TextStyle(
                           color: Colors.black,
-                          fontFamily: 'Helvetica',
+                          fontFamily: 'Roboto',
                           fontWeight: FontWeight.bold,
                           fontSize:
                               MediaQuery.of(context).size.height * 0.017)),
@@ -208,28 +222,37 @@ class _QueuePageState extends State<QueuePage> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: widget.donwloadQueue.length == 0
-            ? EmptyList()
-            : AnimatedList(
-                key: widget.listkey,
-                shrinkWrap: true,
-                itemBuilder: (context, index, animation) {
-                  print(index);
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(-1, 0),
-                      end: Offset(0, 0),
-                    ).animate(animation),
-                    child: QueueWidget(
-                        ytobj: widget.donwloadQueue[index],
-                        downloadStatus: DownloadStatus.waiting,
-                        index: index,
-                        rmov: delete),
-                  );
-                },
-              ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: widget.donwloadQueue.length == 0
+              ? EmptyList()
+              : AnimatedList(
+                  clipBehavior: Clip.none,
+                  key: widget.listkey,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index, animation) {
+                    print(index);
+                    Widget item = SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(-1, 0),
+                        end: Offset(0, 0),
+                      ).animate(animation),
+                      child: QueueWidget(
+                          ytobj: widget.donwloadQueue[index],
+                          downloadStatus: DownloadStatus.waiting,
+                          index: index,
+                          rmov: delete),
+                    );
+                    if (index != 0) {
+                      return Column(
+                        children: [Divider(), item],
+                      );
+                    }
+                    return item;
+                  },
+                ),
+        ),
       ),
     );
   }

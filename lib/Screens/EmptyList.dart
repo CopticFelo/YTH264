@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EmptyList extends StatelessWidget {
   const EmptyList({super.key});
@@ -19,17 +20,16 @@ class EmptyList extends StatelessWidget {
             'No Videos to download',
             style: TextStyle(
                 color: Colors.black,
-                fontFamily: 'Helvetica',
                 fontWeight: FontWeight.bold,
-                fontSize: 20),
+                fontSize: 22,
+                fontFamily: 'Lato'),
           ),
           SizedBox(
-            height: 10,
+            height: 6,
           ),
           Text(
-            'Click on + to add Videos to download',
-            style: TextStyle(
-                color: Colors.black, fontFamily: 'Helvetica', fontSize: 17),
+            'Tap on + to add Videos to download',
+            style: TextStyle(color: Colors.black, fontSize: 17),
           ),
         ],
       ),

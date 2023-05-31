@@ -60,12 +60,28 @@ class QueueWidget extends StatefulWidget {
   State<QueueWidget> createState() => _QueueWidgetState();
 }
 
-class _QueueWidgetState extends State<QueueWidget> {
+class _QueueWidgetState extends State<QueueWidget>
+    with SingleTickerProviderStateMixin {
   ReceivePort? rc;
   SendPort? stopPort;
   bool isDownloading = false; // This shouldn't Exist
   Directory? downloads;
   Directory? temps;
+  late AnimationController _controller;
+  late Animation<Offset> _slide;
+
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
+    _slide = Tween<Offset>(
+      begin: Offset(0, 0),
+      end: Offset(1, 0),
+    ).animate(CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOut));
+  }
 
   // Function to start the download
   void download() async {
@@ -106,15 +122,7 @@ class _QueueWidgetState extends State<QueueWidget> {
       'downloads': downloads,
       // 'showError': errorCallback
     }).then((value) {
-      // Once the Isolate is spawned
-      // It sets the var isDownloading to true and shrinks the download button
-      // Why? I am not sure, the DownloadStatus var should be responsible for this crap
-      // oh well
-      // TODO: Refactor this Crap
-      setState(() {
-        isDownloading = true;
-        downloadButtonWidth = 30;
-      });
+      // Returns the Isolate
       return value;
     });
     // Handling Messages between QueueWidget and downloader Isolate
@@ -133,7 +141,7 @@ class _QueueWidgetState extends State<QueueWidget> {
             downlaoder.kill();
             setState(() {
               isDownloading = false;
-              downloadButtonWidth = 75;
+              _controller.reverse();
             });
             rc!.close();
           }
@@ -141,7 +149,7 @@ class _QueueWidgetState extends State<QueueWidget> {
         // if DownloadStatus (recieved from data[0]) is converting and the media is audioonly
         if (widget.ytobj.downloadType == DownloadType.AudioOnly &&
             widget.downloadStatus == DownloadStatus.converting) {
-          // Convert it from .webm (~in temp folder~) to .mp3 (to be in downloads folder)
+          // Convert it from .webm (in temp folder) to .mp3 (to be in downloads folder)
           DownloadManager.convertToMp3(
               downloads, widget.ytobj, refresh, temps!, context);
           // Note: that Youtube Explode Muxed Video (i.e doesn't need conversion) only supports upto 720p, thus it is not used
@@ -171,7 +179,7 @@ class _QueueWidgetState extends State<QueueWidget> {
     setState(() {
       widget.downloadStatus = DownloadStatus.done;
       isDownloading = false;
-      downloadButtonWidth = MediaQuery.of(context).size.width * 0.23;
+      _controller.reverse();
     });
   }
 
@@ -179,41 +187,40 @@ class _QueueWidgetState extends State<QueueWidget> {
     GlobalMethods.snackBarError(msg, context, isException: true);
   }
 
-  // Builds the status UI (i.e the UI next to the word Status: on the UI)
+  // Builds the status UI
   Widget? buildStatus() {
     print('Status: ${widget.downloadStatus.toString()}');
     // In case of downloading just show a Progress bar
     if (widget.downloadStatus == DownloadStatus.downloading) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.28,
-            height: 7,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
-                color: Theme.of(context).colorScheme.onBackground,
-                value: widget.progress / 100,
+      return Expanded(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.28,
+              height: 2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  backgroundColor: Theme.of(context).colorScheme.onBackground,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
+                  color: Theme.of(context).colorScheme.onBackground,
+                  value: widget.progress / 100,
+                ),
               ),
             ),
-          ),
-          Text(
-            '${widget.progress.floor()}%',
-            style: TextStyle(
+            Text(
+              '${widget.progress.floor()}%',
+              style: TextStyle(
                 fontSize: 14 * MediaQuery.of(context).textScaleFactor,
-                fontWeight: FontWeight.bold,
-                color: Colors.white),
-          )
-        ],
+              ),
+            )
+          ],
+        ),
       );
       // In case of conversion show a random download symbol (To be looked into)
     } else if (widget.downloadStatus == DownloadStatus.converting) {
-      return const Icon(
-        Icons.downloading,
-        color: Colors.white,
-      );
+      return const Text('Converting...');
       // In the case of the Download being done, show a done symbol
     } else if (widget.downloadStatus == DownloadStatus.done) {
       return const Icon(
@@ -226,42 +233,39 @@ class _QueueWidgetState extends State<QueueWidget> {
     }
   }
 
-  double?
-      downloadButtonWidth; // This should be refactored into a map of some sort
   @override
   Widget build(BuildContext context) {
-    // default download button Width
-    downloadButtonWidth = MediaQuery.of(context).size.width * 0.23;
     print('Refreshed');
     // The Text to be displayed under the Video Title
     String type = '';
     if (widget.ytobj.downloadType == DownloadType.Muxed) {
-      type = 'Video+Audio';
+      type = 'Video + Audio';
     } else if (widget.ytobj.downloadType == DownloadType.VideoOnly) {
       type = 'Video';
     } else {
       type = 'Audio';
     }
     // UI
-    return Card(
-      color: Colors.black,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      child: IntrinsicHeight(
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Flexible(
               flex: 1,
               fit: FlexFit.tight,
-              child: Visibility(
-                visible: MediaQuery.of(context).size.width > 350 ? true : false,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(7),
-                  child: Image.network(
-                    widget.ytobj.thumbnail,
-                    fit: BoxFit.fill,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Visibility(
+                  visible:
+                      MediaQuery.of(context).size.width > 350 ? true : false,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: Image.network(
+                      widget.ytobj.thumbnail,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -272,10 +276,10 @@ class _QueueWidgetState extends State<QueueWidget> {
             Flexible(
               flex: 2,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 1),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: SizedBox(
@@ -283,151 +287,110 @@ class _QueueWidgetState extends State<QueueWidget> {
                         widget.ytobj.title,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontFamily: 'Lato'),
                       )),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 1),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(type,
+                        Text("${widget.ytobj.author} · $type",
                             style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Helvetica',
-                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w200,
                                 fontSize:
                                     MediaQuery.of(context).textScaleFactor *
                                         10)),
-                        Row(
-                          children: [
-                            TextButton(
-                              style: ButtonStyle(
-                                minimumSize:
-                                    MaterialStateProperty.all(Size.zero),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: MaterialStateProperty.all(
-                                    const EdgeInsets.all(6.0)),
-                                shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20))),
-                                backgroundColor: MaterialStateProperty.all(
-                                    Theme.of(context).colorScheme.onBackground),
-                                overlayColor:
-                                    MaterialStateProperty.all(Colors.grey),
-                              ),
-                              onPressed: () => widget.rmov(widget.index),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.delete,
-                                    color: Colors.white,
-                                    size: 10,
-                                  ),
-                                  Text(
-                                    'Delete',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Helvetica',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: MediaQuery.of(context)
-                                                .textScaleFactor *
-                                            10),
-                                  )
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
                       ],
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 1),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        buildStatus() ?? Container(),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text(
-                              'Status:',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Helvetica',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10),
-                            ),
-                            buildStatus() ?? Container(),
-                          ],
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            minimumSize: MaterialStateProperty.all(Size.zero),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            padding: MaterialStateProperty.all(
-                                const EdgeInsets.all(4.0)),
-                            shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20))),
-                            backgroundColor:
-                                MaterialStateProperty.all(Colors.white),
-                            overlayColor:
-                                MaterialStateProperty.all(Colors.grey),
-                          ),
-                          onPressed: () {
-                            if (!isDownloading) {
-                              download();
-                            } else {
-                              rc!.close();
-                              DownloadManager.stop(widget.downloadStatus,
-                                  widget.ytobj, downloads!, temps!, stopPort);
-                              setState(() {
-                                isDownloading = false;
-                                downloadButtonWidth = 75;
-                                widget.downloadStatus = DownloadStatus.waiting;
-                              });
-                            }
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(microseconds: 1000),
-                            curve: Curves.easeIn,
-                            // width: downloadButtonWidth,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20)),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Center(
-                                  child: Icon(
-                                    isDownloading
-                                        ? Icons.cancel
-                                        : Icons.download,
-                                    color: Colors.black,
-                                    size: 10,
+                            SlideTransition(
+                              position: _slide,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: ClipOval(
+                                  child: Material(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onBackground,
+                                    child: InkWell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Icon(
+                                          isDownloading
+                                              ? Icons.cancel
+                                              : Icons.download,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      onTap: () {
+                                        if (!isDownloading) {
+                                          setState(() {
+                                            isDownloading = true;
+                                            _controller.forward();
+                                          });
+                                          download();
+                                        } else {
+                                          setState(() {
+                                            isDownloading = false;
+                                            // downloadButtonWidth = 75;
+                                            widget.downloadStatus =
+                                                DownloadStatus.waiting;
+                                          });
+                                          rc!.close();
+                                          DownloadManager.stop(
+                                              widget.downloadStatus,
+                                              widget.ytobj,
+                                              downloads!,
+                                              temps!,
+                                              stopPort);
+                                          _controller.reverse();
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ),
-                                Visibility(
-                                  visible: !isDownloading,
-                                  child: Text(
-                                    'Download',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'Helvetica',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: MediaQuery.of(context)
-                                                .textScaleFactor *
-                                            10),
-                                  ),
-                                )
-                              ],
+                              ),
                             ),
-                          ),
-                        )
+                            Visibility(
+                              maintainAnimation: true,
+                              maintainState: true,
+                              maintainSize: true,
+                              visible: !isDownloading,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: ClipOval(
+                                  child: Material(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onBackground,
+                                    child: InkWell(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: Icon(
+                                            Icons.delete_rounded,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        onTap: () => widget.rmov(widget.index)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   )

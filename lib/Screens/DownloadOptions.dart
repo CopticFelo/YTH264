@@ -39,7 +39,7 @@ class _DownloadOptionsState extends State<DownloadOptions>
           const Text('Video Quality',
               style: TextStyle(
                   color: Colors.black,
-                  fontFamily: 'Helvetica',
+                  fontFamily: 'Lato',
                   fontWeight: FontWeight.bold,
                   fontSize: 27)),
           Padding(
@@ -148,7 +148,7 @@ class _DownloadOptionsState extends State<DownloadOptions>
                               maxLines: 2,
                               style: const TextStyle(
                                   color: Colors.black,
-                                  fontFamily: 'Helvetica',
+                                  fontFamily: 'Lato',
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15)),
                           const SizedBox(
@@ -170,7 +170,7 @@ class _DownloadOptionsState extends State<DownloadOptions>
                       const Text('Download Type',
                           style: TextStyle(
                               color: Colors.black,
-                              fontFamily: 'Helvetica',
+                              fontFamily: 'Lato',
                               fontWeight: FontWeight.bold,
                               fontSize: 27)),
                       Padding(
@@ -234,7 +234,7 @@ class _DownloadOptionsState extends State<DownloadOptions>
                               child: Text('Add to Queue',
                                   style: TextStyle(
                                       color: Colors.white,
-                                      fontFamily: 'Helvetica',
+                                      fontFamily: 'Lato',
                                       fontWeight: FontWeight.bold,
                                       fontSize: 17)),
                             ),

@@ -33,7 +33,7 @@ class _VividAppState extends State<VividApp> {
                 error: Colors.red[700]!,
                 onError: Colors.white,
                 background: Colors.white,
-                onBackground: const Color.fromARGB(100, 235, 235, 235),
+                onBackground: Color.fromARGB(150, 235, 235, 235),
                 surface: Colors.white,
                 onSurface: const Color.fromARGB(100, 235, 235, 235))),
         home: QueuePage());
