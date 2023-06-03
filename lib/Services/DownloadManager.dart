@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:remove_emoji/remove_emoji.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../Widgets/QueueWidget.dart';
@@ -24,7 +23,6 @@ class DownloadManager {
     print('Starting Download');
     final yt = YoutubeExplode();
     double progress = 0;
-    String? vidDir, audioDir;
     String title = args['ytObj'].validTitle as String;
     // print(title);
     if (args['ytObj'].downloadType == DownloadType.VideoOnly ||
@@ -42,7 +40,6 @@ class DownloadManager {
         }
         fileDir =
             '${directory!.path}/$title.${args['ytObj'].stream.container.name}';
-        vidDir = fileDir;
         File vidFile = await File(fileDir).create(recursive: true);
         var fileStream = vidFile.openWrite(mode: FileMode.writeOnlyAppend);
         await for (var bytes in stream) {
@@ -75,7 +72,6 @@ class DownloadManager {
 
         fileDir =
             '${directory!.path}/$title.${args['ytObj'].bestAudio.container.name}';
-        audioDir = fileDir;
         File audFile = await File(fileDir).create(recursive: true);
         var fileStream =
             await audFile.openWrite(mode: FileMode.writeOnlyAppend);
@@ -152,8 +148,6 @@ class DownloadManager {
         GlobalMethods.snackBarError(session.getOutput().toString(), context);
         clean(ytobj, downloads, temp, true);
       }
-
-      File old = File(audioDir);
 
       // try {
       //   await old.delete();

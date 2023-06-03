@@ -13,17 +13,17 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QueuePage extends StatefulWidget {
-  GlobalKey<AnimatedListState> listkey = GlobalKey<AnimatedListState>();
+  final GlobalKey<AnimatedListState> listkey = GlobalKey<AnimatedListState>();
   QueuePage({super.key});
-
-  List<YoutubeQueueObject> donwloadQueue = [];
 
   @override
   State<QueuePage> createState() => _QueuePageState();
 }
 
 class _QueuePageState extends State<QueuePage> {
+  // ignore: unused_field
   late StreamSubscription _intentDataStreamSubscription;
+  List<YoutubeQueueObject> downloadQueue = [];
   String? _sharedText;
   void initState() {
     super.initState();
@@ -45,20 +45,8 @@ class _QueuePageState extends State<QueuePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => loadList());
   }
 
-  List<Widget> buildQueue() {
-    int count = -1;
-    return widget.donwloadQueue.map((e) {
-      count++;
-      return QueueWidget(
-          ytobj: e as YoutubeQueueObject,
-          downloadStatus: DownloadStatus.waiting,
-          index: count,
-          rmov: delete);
-    }).toList();
-  }
-
   void delete(int index) {
-    QueueObject obj = widget.donwloadQueue[index];
+    QueueObject obj = downloadQueue[index];
     widget.listkey.currentState!.removeItem(
         index,
         ((context, animation) => SlideTransition(
@@ -67,13 +55,10 @@ class _QueuePageState extends State<QueuePage> {
                 end: Offset(0, 0),
               ).animate(animation),
               child: QueueWidget(
-                  ytobj: obj as YoutubeQueueObject,
-                  downloadStatus: DownloadStatus.waiting,
-                  index: index,
-                  rmov: delete),
+                  ytobj: obj as YoutubeQueueObject, index: index, rmov: delete),
             )),
         duration: Duration(milliseconds: 100));
-    widget.donwloadQueue.removeAt(index);
+    downloadQueue.removeAt(index);
     saveList();
     setState(() {});
   }
@@ -81,9 +66,8 @@ class _QueuePageState extends State<QueuePage> {
   void add(QueueObject queueObject, {bool fromJson = false, int? index}) {
     Duration time = Duration(milliseconds: fromJson ? 0 : 100);
     widget.listkey.currentState!.insertItem(
-        index != null ? index : widget.donwloadQueue.length - 1,
+        index != null ? index : downloadQueue.length - 1,
         duration: time);
-    final ytobj = queueObject as YoutubeQueueObject;
     if (!fromJson) {
       saveList();
     }
@@ -91,7 +75,7 @@ class _QueuePageState extends State<QueuePage> {
 
   void saveList() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String encodedData = YoutubeQueueObject.encode(widget.donwloadQueue);
+    final String encodedData = YoutubeQueueObject.encode(downloadQueue);
     await prefs.setString('Queue', encodedData);
   }
 
@@ -101,13 +85,13 @@ class _QueuePageState extends State<QueuePage> {
     final String? jsonString = await prefs.getString('Queue');
     print(jsonString);
     if (jsonString != null) {
-      widget.donwloadQueue = YoutubeQueueObject.decode(jsonString);
+      downloadQueue = YoutubeQueueObject.decode(jsonString);
       // to init the animated list
-      if (widget.donwloadQueue.isNotEmpty) {
+      if (downloadQueue.isNotEmpty) {
         setState(() {});
         SchedulerBinding.instance.addPostFrameCallback((_) {
           int index = 0;
-          for (var element in widget.donwloadQueue) {
+          for (var element in downloadQueue) {
             add(element, fromJson: true, index: index);
             index++;
           }
@@ -116,8 +100,8 @@ class _QueuePageState extends State<QueuePage> {
       }
 
       int index = 0;
-      print(widget.donwloadQueue.length);
-      for (var element in widget.donwloadQueue) {
+      print(downloadQueue.length);
+      for (var element in downloadQueue) {
         add(element, fromJson: true, index: index);
         index++;
       }
@@ -142,18 +126,18 @@ class _QueuePageState extends State<QueuePage> {
               final SharedPreferences prefs =
                   await SharedPreferences.getInstance();
               final String? jsonString = await prefs.getString('Queue');
-              if (widget.donwloadQueue.isEmpty && jsonString == null) {
+              if (downloadQueue.isEmpty && jsonString == null) {
                 setState(() {
-                  widget.donwloadQueue.add(value as YoutubeQueueObject);
+                  downloadQueue.add(value as YoutubeQueueObject);
                 });
                 SchedulerBinding.instance.addPostFrameCallback((_) {
                   add(value);
                 });
                 return;
               }
-              widget.donwloadQueue.add(value as YoutubeQueueObject);
+              downloadQueue.add(value as YoutubeQueueObject);
               add(value);
-              print(widget.donwloadQueue);
+              print(downloadQueue);
               setState(() {});
             }
           }));
@@ -193,18 +177,18 @@ class _QueuePageState extends State<QueuePage> {
                       return AddModalPopup();
                     }).then((value) {
                   if (value != null) {
-                    if (widget.donwloadQueue.isEmpty) {
+                    if (downloadQueue.isEmpty) {
                       setState(() {
-                        widget.donwloadQueue.add(value as YoutubeQueueObject);
+                        downloadQueue.add(value as YoutubeQueueObject);
                       });
                       SchedulerBinding.instance.addPostFrameCallback((_) {
                         add(value);
                       });
                       return;
                     }
-                    widget.donwloadQueue.add(value as YoutubeQueueObject);
+                    downloadQueue.add(value as YoutubeQueueObject);
                     add(value);
-                    print(widget.donwloadQueue);
+                    print(downloadQueue);
                     setState(() {});
                   }
                 }),
@@ -225,7 +209,7 @@ class _QueuePageState extends State<QueuePage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(18.0),
-          child: widget.donwloadQueue.length == 0
+          child: downloadQueue.length == 0
               ? EmptyList()
               : AnimatedList(
                   clipBehavior: Clip.none,
@@ -239,8 +223,7 @@ class _QueuePageState extends State<QueuePage> {
                         end: Offset(0, 0),
                       ).animate(animation),
                       child: QueueWidget(
-                          ytobj: widget.donwloadQueue[index],
-                          downloadStatus: DownloadStatus.waiting,
+                          ytobj: downloadQueue[index],
                           index: index,
                           rmov: delete),
                     );

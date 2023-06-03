@@ -4,10 +4,11 @@ import 'package:YT_H264/Screens/DownloadOptions.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Services/Youtube.dart';
 
+// ignore: must_be_immutable
 class AddModalPopup extends StatefulWidget {
-  AddModalPopup({super.key, this.uri});
   String? uri;
-  YoutubeService ytServ = YoutubeService();
+  final YoutubeService ytServ = YoutubeService();
+  AddModalPopup({super.key, this.uri});
 
   @override
   State<AddModalPopup> createState() => _AddModalPopupState();

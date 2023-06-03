@@ -39,20 +39,15 @@ Future<Directory?> getDownloads() async {
 
 class QueueWidget extends StatefulWidget {
   // The obj the widget is handling
-  YoutubeQueueObject ytobj;
-  // the Status of the download for UI elements to keep track of
-  DownloadStatus downloadStatus;
-  // download progress (if progress > 0: downloading)
-  double progress = 0;
+  final YoutubeQueueObject ytobj;
   // index of the widget
   final index;
   // function to remove from Download List
-  Function rmov;
+  final Function rmov;
 
   QueueWidget(
       {super.key,
       required this.ytobj,
-      required this.downloadStatus,
       required this.index,
       required this.rmov});
 
@@ -62,6 +57,10 @@ class QueueWidget extends StatefulWidget {
 
 class _QueueWidgetState extends State<QueueWidget>
     with SingleTickerProviderStateMixin {
+  DownloadStatus downloadStatus = DownloadStatus.waiting;
+  // the Status of the download for UI elements to keep track of
+  // download progress (if progress > 0: downloading)
+  double progress = 0;
   ReceivePort? rc;
   SendPort? stopPort;
   bool isDownloading = false; // This shouldn't Exist
@@ -96,23 +95,11 @@ class _QueueWidgetState extends State<QueueWidget>
       }
     }
     // Status: Downloading
-    widget.downloadStatus = DownloadStatus.downloading;
+    downloadStatus = DownloadStatus.downloading;
     // Get the temp dir
     temps = await getTemp();
     // Get the Downloads dir
     downloads = await getDownloads();
-    // // Gets the title
-    // String title = widget.ytobj.title;
-    // // Filters the title of non-allowed characters for filenames
-    // title = title
-    //     .replaceAll(r'\', '')
-    //     .replaceAll('/', '')
-    //     .replaceAll('*', '')
-    //     .replaceAll('?', '')
-    //     .replaceAll('"', '')
-    //     .replaceAll('<', '')
-    //     .replaceAll('>', '')
-    //     .replaceAll('|', '');
     // Spawns an Isolate of the Function DownloadManager.downloadVideoFromYoutube
     Isolate downlaoder = await Isolate.spawn<Map<String, dynamic>>(
         DownloadManager.donwloadVideoFromYoutube, <String, dynamic>{
@@ -134,10 +121,10 @@ class _QueueWidgetState extends State<QueueWidget>
         // data[1] is the Download Progress
         setState(() {
           // Set the Progress and Status Accordingly
-          widget.downloadStatus = data[0];
-          widget.progress = data[1];
+          downloadStatus = data[0];
+          progress = data[1];
           // if Done (i.e not doing any converstion magic afterwards) Kill the Isolate, close rc and set the UI Up
-          if (widget.downloadStatus == DownloadStatus.done) {
+          if (downloadStatus == DownloadStatus.done) {
             downlaoder.kill();
             setState(() {
               isDownloading = false;
@@ -148,14 +135,14 @@ class _QueueWidgetState extends State<QueueWidget>
         });
         // if DownloadStatus (recieved from data[0]) is converting and the media is audioonly
         if (widget.ytobj.downloadType == DownloadType.AudioOnly &&
-            widget.downloadStatus == DownloadStatus.converting) {
+            downloadStatus == DownloadStatus.converting) {
           // Convert it from .webm (in temp folder) to .mp3 (to be in downloads folder)
           DownloadManager.convertToMp3(
               downloads, widget.ytobj, refresh, temps!, context);
           // Note: that Youtube Explode Muxed Video (i.e doesn't need conversion) only supports upto 720p, thus it is not used
           // if DownloadStatus (recieved from data[0]) is converting and the media is Muxed (i.e Video + Audio)
         } else if (widget.ytobj.downloadType == DownloadType.Muxed &&
-            widget.downloadStatus == DownloadStatus.converting) {
+            downloadStatus == DownloadStatus.converting) {
           // Combine .webm (in temp folder) + mp4 (audioless, in temp folder) into .mp4 (with audio, to be in downloads folder)
           DownloadManager.mergeIntoMp4(
               temps, downloads, widget.ytobj, refresh, context);
@@ -177,7 +164,7 @@ class _QueueWidgetState extends State<QueueWidget>
   // Used by external Functions to notify the widget that the download (Conversion) is done
   void refresh() {
     setState(() {
-      widget.downloadStatus = DownloadStatus.done;
+      downloadStatus = DownloadStatus.done;
       isDownloading = false;
       _controller.reverse();
     });
@@ -189,9 +176,9 @@ class _QueueWidgetState extends State<QueueWidget>
 
   // Builds the status UI
   Widget? buildStatus() {
-    print('Status: ${widget.downloadStatus.toString()}');
+    print('Status: ${downloadStatus.toString()}');
     // In case of downloading just show a Progress bar
-    if (widget.downloadStatus == DownloadStatus.downloading) {
+    if (downloadStatus == DownloadStatus.downloading) {
       return Expanded(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -205,12 +192,12 @@ class _QueueWidgetState extends State<QueueWidget>
                   backgroundColor: Theme.of(context).colorScheme.onBackground,
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
                   color: Theme.of(context).colorScheme.onBackground,
-                  value: widget.progress / 100,
+                  value: progress / 100,
                 ),
               ),
             ),
             Text(
-              '${widget.progress.floor()}%',
+              '${progress.floor()}%',
               style: TextStyle(
                 fontSize: 14 * MediaQuery.of(context).textScaleFactor,
               ),
@@ -219,10 +206,10 @@ class _QueueWidgetState extends State<QueueWidget>
         ),
       );
       // In case of conversion show a random download symbol (To be looked into)
-    } else if (widget.downloadStatus == DownloadStatus.converting) {
+    } else if (downloadStatus == DownloadStatus.converting) {
       return const Text('Converting...');
       // In the case of the Download being done, show a done symbol
-    } else if (widget.downloadStatus == DownloadStatus.done) {
+    } else if (downloadStatus == DownloadStatus.done) {
       return const Icon(
         Icons.done,
         color: Colors.white,
@@ -346,12 +333,12 @@ class _QueueWidgetState extends State<QueueWidget>
                                           setState(() {
                                             isDownloading = false;
                                             // downloadButtonWidth = 75;
-                                            widget.downloadStatus =
+                                            downloadStatus =
                                                 DownloadStatus.waiting;
                                           });
                                           rc!.close();
                                           DownloadManager.stop(
-                                              widget.downloadStatus,
+                                              downloadStatus,
                                               widget.ytobj,
                                               downloads!,
                                               temps!,
