@@ -6,6 +6,7 @@ import 'dart:isolate';
 
 import 'package:YT_H264/Services/GlobalMethods.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:YT_H264/Services/DownloadManager.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
@@ -184,7 +185,7 @@ class _QueueWidgetState extends State<QueueWidget>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.28,
+              width: 67.w,
               height: 2,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
@@ -196,23 +197,27 @@ class _QueueWidgetState extends State<QueueWidget>
                 ),
               ),
             ),
+            SizedBox(
+              width: 10.w,
+            ),
             Text(
               '${progress.floor()}%',
               style: TextStyle(
-                fontSize: 14 * MediaQuery.of(context).textScaleFactor,
+                fontSize: 15.sp,
               ),
             )
           ],
         ),
       );
-      // In case of conversion show a random download symbol (To be looked into)
     } else if (downloadStatus == DownloadStatus.converting) {
-      return const Text('Converting...');
-      // In the case of the Download being done, show a done symbol
+      return Text(
+        'Converting...',
+        style: TextStyle(fontFamily: "Lato", fontSize: 10.sp),
+      );
     } else if (downloadStatus == DownloadStatus.done) {
-      return const Icon(
-        Icons.done,
-        color: Colors.white,
+      return Text(
+        "Done",
+        style: TextStyle(fontFamily: "Lato", fontSize: 10.sp),
       );
       // Else show nothing (i.e when the user hasn't clicked the download button)
     } else {
@@ -239,74 +244,64 @@ class _QueueWidgetState extends State<QueueWidget>
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Flexible(
-              flex: 1,
-              fit: FlexFit.tight,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Visibility(
-                  visible:
-                      MediaQuery.of(context).size.width > 350 ? true : false,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(7),
-                    child: Image.network(
-                      widget.ytobj.thumbnail,
-                      fit: BoxFit.cover,
-                    ),
+            SizedBox(
+              width: 144.w,
+              height: 80.h,
+              child: Visibility(
+                visible: MediaQuery.of(context).size.width > 350 ? true : false,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.network(
+                    widget.ytobj.thumbnail,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
-            const SizedBox(
-              width: 10,
+            SizedBox(
+              width: 10.w,
             ),
-            Flexible(
-              flex: 2,
+            Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 1),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                          child: Text(
-                        widget.ytobj.title,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontFamily: 'Lato'),
-                      )),
-                    ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                        child: Text(
+                      widget.ytobj.title,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Lato',
+                          fontSize: 11.sp),
+                    )),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 1),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("${widget.ytobj.author} · $type",
-                            style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w200,
-                                fontSize:
-                                    MediaQuery.of(context).textScaleFactor *
-                                        10)),
-                      ],
-                    ),
+                  SizedBox(height: 2.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("${widget.ytobj.author} · $type",
+                          style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w200,
+                              fontSize: 9.sp)),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 1),
+                  SizedBox(height: 2.h),
+                  Expanded(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         buildStatus() ?? Container(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SlideTransition(
-                              position: _slide,
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
+                        Padding(
+                          padding: EdgeInsets.all(2.r),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SlideTransition(
+                                position: _slide,
                                 child: ClipOval(
                                   child: Material(
                                     color: Theme.of(context)
@@ -314,12 +309,12 @@ class _QueueWidgetState extends State<QueueWidget>
                                         .onBackground,
                                     child: InkWell(
                                       child: Padding(
-                                        padding: const EdgeInsets.all(5.0),
+                                        padding: EdgeInsets.all(8.r),
                                         child: Icon(
                                           isDownloading
                                               ? Icons.cancel
                                               : Icons.download,
-                                          size: 20,
+                                          size: 16.w,
                                         ),
                                       ),
                                       onTap: () {
@@ -350,14 +345,12 @@ class _QueueWidgetState extends State<QueueWidget>
                                   ),
                                 ),
                               ),
-                            ),
-                            Visibility(
-                              maintainAnimation: true,
-                              maintainState: true,
-                              maintainSize: true,
-                              visible: !isDownloading,
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
+                              SizedBox(width: 12.w),
+                              Visibility(
+                                maintainAnimation: true,
+                                maintainState: true,
+                                maintainSize: true,
+                                visible: !isDownloading,
                                 child: ClipOval(
                                   child: Material(
                                     color: Theme.of(context)
@@ -365,18 +358,18 @@ class _QueueWidgetState extends State<QueueWidget>
                                         .onBackground,
                                     child: InkWell(
                                         child: Padding(
-                                          padding: const EdgeInsets.all(5.0),
+                                          padding: EdgeInsets.all(8.r),
                                           child: Icon(
                                             Icons.delete_rounded,
-                                            size: 20,
+                                            size: 16.w,
                                           ),
                                         ),
                                         onTap: () => widget.rmov(widget.index)),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),

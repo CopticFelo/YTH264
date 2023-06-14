@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.4.7
+version: 0.4.8
 
 environment:
     sdk: '>=2.18.0 <3.0.0'
@@ -46,6 +46,7 @@ dependencies:
     receive_sharing_intent: ^1.4.5
     shared_preferences: ^2.1.1
     google_fonts: ^4.0.4
+    flutter_screenutil: ^5.8.4
 
 dev_dependencies:
     flutter_test:
@@ -98,8 +99,8 @@ flutter:
   fonts:
   - family: Lato
     fonts:
-      - asset: assets/fonts/Lato/Lato-Bold.ttf
-      - asset: assets/fonts/Lato/Lato-Regular.ttf
+      - asset: assets/Lato-Bold.ttf
+      - asset: assets/Lato-Regular.ttf
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
