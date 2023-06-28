@@ -53,10 +53,10 @@ class QueueWidget extends StatefulWidget {
       required this.rmov});
 
   @override
-  State<QueueWidget> createState() => _QueueWidgetState();
+  State<QueueWidget> createState() => QueueWidgetState();
 }
 
-class _QueueWidgetState extends State<QueueWidget>
+class QueueWidgetState extends State<QueueWidget>
     with SingleTickerProviderStateMixin {
   DownloadStatus downloadStatus = DownloadStatus.waiting;
   // the Status of the download for UI elements to keep track of

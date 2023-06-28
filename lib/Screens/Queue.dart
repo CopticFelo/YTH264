@@ -24,6 +24,7 @@ class _QueuePageState extends State<QueuePage> {
   // ignore: unused_field
   late StreamSubscription _intentDataStreamSubscription;
   List<YoutubeQueueObject> downloadQueue = [];
+  List<GlobalKey<QueueWidgetState>> keys = [];
   String? _sharedText;
   void initState() {
     super.initState();
@@ -58,12 +59,14 @@ class _QueuePageState extends State<QueuePage> {
                   ytobj: obj as YoutubeQueueObject, index: index, rmov: delete),
             )),
         duration: Duration(milliseconds: 100));
+    keys.removeAt(index);
     downloadQueue.removeAt(index);
     saveList();
     setState(() {});
   }
 
   void add(QueueObject queueObject, {bool fromJson = false, int? index}) {
+    keys.add(GlobalKey<QueueWidgetState>());
     Duration time = Duration(milliseconds: fromJson ? 0 : 100);
     widget.listkey.currentState!.insertItem(
         index != null ? index : downloadQueue.length - 1,
@@ -216,6 +219,7 @@ class _QueuePageState extends State<QueuePage> {
                   key: widget.listkey,
                   shrinkWrap: true,
                   itemBuilder: (context, index, animation) {
+                    final key = keys[index];
                     print(index);
                     Widget item = SlideTransition(
                       position: Tween<Offset>(
@@ -223,6 +227,7 @@ class _QueuePageState extends State<QueuePage> {
                         end: Offset(0, 0),
                       ).animate(animation),
                       child: QueueWidget(
+                          key: key,
                           ytobj: downloadQueue[index],
                           index: index,
                           rmov: delete),
