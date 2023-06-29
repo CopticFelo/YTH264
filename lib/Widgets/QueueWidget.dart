@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:YT_H264/Services/GlobalMethods.dart';
+import 'package:ffmpeg_kit_flutter_full/ffmpeg_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
@@ -67,6 +68,7 @@ class QueueWidgetState extends State<QueueWidget>
   bool isDownloading = false; // This shouldn't Exist
   Directory? downloads;
   Directory? temps;
+  FFmpegSession? conversionSession;
   late AnimationController _controller;
   late Animation<Offset> _slide;
 
@@ -114,7 +116,7 @@ class QueueWidgetState extends State<QueueWidget>
       return value;
     });
     // Handling Messages between QueueWidget and downloader Isolate
-    rc!.listen((data) {
+    rc!.listen((data) async {
       // Unsafe way of handling messaging (I fixed it in another branch Gotta wait for it to be done)
       if (data.length > 1) {
         // It means that it is a Download Progress Report (Which may or may not be done)
@@ -138,14 +140,14 @@ class QueueWidgetState extends State<QueueWidget>
         if (widget.ytobj.downloadType == DownloadType.AudioOnly &&
             downloadStatus == DownloadStatus.converting) {
           // Convert it from .webm (in temp folder) to .mp3 (to be in downloads folder)
-          DownloadManager.convertToMp3(
+          conversionSession = await DownloadManager.convertToMp3(
               downloads, widget.ytobj, refresh, temps!, context);
           // Note: that Youtube Explode Muxed Video (i.e doesn't need conversion) only supports upto 720p, thus it is not used
           // if DownloadStatus (recieved from data[0]) is converting and the media is Muxed (i.e Video + Audio)
         } else if (widget.ytobj.downloadType == DownloadType.Muxed &&
             downloadStatus == DownloadStatus.converting) {
           // Combine .webm (in temp folder) + mp4 (audioless, in temp folder) into .mp4 (with audio, to be in downloads folder)
-          DownloadManager.mergeIntoMp4(
+          conversionSession = await DownloadManager.mergeIntoMp4(
               temps, downloads, widget.ytobj, refresh, context);
         }
       } else {
@@ -337,7 +339,8 @@ class QueueWidgetState extends State<QueueWidget>
                                               widget.ytobj,
                                               downloads!,
                                               temps!,
-                                              stopPort);
+                                              stopPort,
+                                              conversionSession);
                                           _controller.reverse();
                                         }
                                       },

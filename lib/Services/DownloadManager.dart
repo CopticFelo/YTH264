@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'package:YT_H264/Services/GlobalMethods.dart';
+import 'package:ffmpeg_kit_flutter_full/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -101,8 +102,12 @@ class DownloadManager {
     Isolate.exit();
   }
 
-  static void convertToMp3(Directory? downloads, YoutubeQueueObject ytobj,
-      Function callBack, Directory temp, BuildContext context) async {
+  static Future<FFmpegSession> convertToMp3(
+      Directory? downloads,
+      YoutubeQueueObject ytobj,
+      Function callBack,
+      Directory temp,
+      BuildContext context) async {
     String imgPath = '${temp.path}/${ytobj.validTitle}.jpg';
 
     File? imgfile = await getImageAsFile(ytobj.thumbnail, imgPath);
@@ -140,7 +145,7 @@ class DownloadManager {
     }
 
     print(args);
-    FFmpegKit.executeWithArgumentsAsync(args, (session) async {
+    return await FFmpegKit.executeWithArgumentsAsync(args, (session) async {
       final returnCode = await session.getReturnCode();
 
       if (!ReturnCode.isSuccess(returnCode) &&
@@ -166,8 +171,12 @@ class DownloadManager {
     }));
   }
 
-  static void mergeIntoMp4(Directory? temps, Directory? downloads,
-      YoutubeQueueObject ytobj, Function callBack, BuildContext context) {
+  static Future<FFmpegSession> mergeIntoMp4(
+      Directory? temps,
+      Directory? downloads,
+      YoutubeQueueObject ytobj,
+      Function callBack,
+      BuildContext context) async {
     String audioDir =
         "${temps!.path}/${ytobj.validTitle}.${ytobj.bestAudio.container.name}";
 
@@ -190,7 +199,7 @@ class DownloadManager {
       '$outDir'
     ];
 
-    FFmpegKit.executeWithArgumentsAsync(args, (session) async {
+    return await FFmpegKit.executeWithArgumentsAsync(args, (session) async {
       final returnCode = await session.getReturnCode();
 
       if (!ReturnCode.isSuccess(returnCode) &&
@@ -225,12 +234,17 @@ class DownloadManager {
     }
   }
 
-  static void stop(DownloadStatus ds, YoutubeQueueObject queueObject,
-      Directory downloads, Directory temps, SendPort? stopper) async {
+  static void stop(
+      DownloadStatus ds,
+      YoutubeQueueObject queueObject,
+      Directory downloads,
+      Directory temps,
+      SendPort? stopper,
+      FFmpegSession? fs) async {
     if (ds == DownloadStatus.downloading) {
       stopper!.send(null);
     } else {
-      FFmpegKit.cancel();
+      FFmpegKit.cancel(fs!.getSessionId());
     }
     clean(queueObject, downloads, temps, true);
   }
