@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:YT_H264/Screens/DownloadOptions.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Services/Youtube.dart';
+import 'package:clipboard/clipboard.dart';
 
 // ignore: must_be_immutable
 class AddModalPopup extends StatefulWidget {
@@ -16,8 +17,24 @@ class AddModalPopup extends StatefulWidget {
 
 class _AddModalPopupState extends State<AddModalPopup> {
   final TextEditingController _uriController = TextEditingController();
-  Widget downloadButton = Icon(Icons.search);
+  Widget downloadButton = Icon(Icons.paste);
   YoutubeQueueObject? vidInfo;
+
+  @override
+  void initState() {
+    _uriController.addListener(() {
+      if (_uriController.text.length == 0) {
+        setState(() {
+          downloadButton = Icon(Icons.paste);
+        });
+      } else {
+        setState(() {
+          downloadButton = Icon(Icons.search);
+        });
+      }
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -138,8 +155,11 @@ class _AddModalPopupState extends State<AddModalPopup> {
                                         isException: true);
                                   }
                                 } else {
-                                  GlobalMethods.snackBarError(
-                                      'Enter Link', context);
+                                  FlutterClipboard.paste().then((value) {
+                                    setState(() {
+                                      _uriController.text = value;
+                                    });
+                                  });
                                 }
                               },
                               child: downloadButton,
