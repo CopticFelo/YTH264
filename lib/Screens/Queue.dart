@@ -13,7 +13,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QueuePage extends StatefulWidget {
-  final GlobalKey<AnimatedListState> listkey = GlobalKey<AnimatedListState>();
   QueuePage({super.key});
 
   @override
@@ -23,6 +22,7 @@ class QueuePage extends StatefulWidget {
 class _QueuePageState extends State<QueuePage> {
   // ignore: unused_field
   late StreamSubscription _intentDataStreamSubscription;
+  final GlobalKey<AnimatedListState> listkey = GlobalKey<AnimatedListState>();
   List<YoutubeQueueObject> downloadQueue = [];
   List<GlobalKey<QueueWidgetState>> keys = [];
   String? _sharedText;
@@ -48,7 +48,7 @@ class _QueuePageState extends State<QueuePage> {
 
   void delete(int index) {
     QueueObject obj = downloadQueue[index];
-    widget.listkey.currentState!.removeItem(
+    listkey.currentState!.removeItem(
         index,
         ((context, animation) => SlideTransition(
               position: Tween<Offset>(
@@ -68,7 +68,7 @@ class _QueuePageState extends State<QueuePage> {
   void add(QueueObject queueObject, {bool fromJson = false, int? index}) {
     keys.add(GlobalKey<QueueWidgetState>());
     Duration time = Duration(milliseconds: fromJson ? 0 : 100);
-    widget.listkey.currentState!.insertItem(
+    listkey.currentState!.insertItem(
         index != null ? index : downloadQueue.length - 1,
         duration: time);
     if (!fromJson) {
@@ -216,7 +216,7 @@ class _QueuePageState extends State<QueuePage> {
               ? EmptyList()
               : AnimatedList(
                   clipBehavior: Clip.none,
-                  key: widget.listkey,
+                  key: listkey,
                   shrinkWrap: true,
                   itemBuilder: (context, index, animation) {
                     final key = keys[index];
