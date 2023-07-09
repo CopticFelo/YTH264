@@ -18,19 +18,22 @@ class AddModalPopup extends StatefulWidget {
 class _AddModalPopupState extends State<AddModalPopup> {
   final TextEditingController _uriController = TextEditingController();
   Widget downloadButton = Icon(Icons.paste);
+  bool isSearching = false;
   YoutubeQueueObject? vidInfo;
 
   @override
   void initState() {
     _uriController.addListener(() {
-      if (_uriController.text.length == 0) {
-        setState(() {
-          downloadButton = Icon(Icons.paste);
-        });
-      } else {
-        setState(() {
-          downloadButton = Icon(Icons.search);
-        });
+      if (!isSearching) {
+        if (_uriController.text.length == 0) {
+          setState(() {
+            downloadButton = Icon(Icons.paste);
+          });
+        } else {
+          setState(() {
+            downloadButton = Icon(Icons.search);
+          });
+        }
       }
     });
     super.initState();
@@ -41,6 +44,39 @@ class _AddModalPopupState extends State<AddModalPopup> {
     super.dispose();
   }
 
+  Future<void> search() async {
+    if (_uriController.text != '') {
+      try {
+        setState(() {
+          isSearching = true;
+          downloadButton = Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: CircularProgressIndicator(),
+          );
+        });
+        vidInfo =
+            await widget.ytServ.getVidInfo(_uriController.text).then((value) {
+          setState(() {
+            isSearching = false;
+            downloadButton = Icon(Icons.search);
+          });
+          return value;
+        });
+        print(vidInfo!.title);
+        setState(() {});
+      } catch (e) {
+        downloadButton = Icon(Icons.search);
+        GlobalMethods.snackBarError(e.toString(), context, isException: true);
+      }
+    } else {
+      FlutterClipboard.paste().then((value) {
+        setState(() {
+          _uriController.text = value;
+        });
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.uri != null) {
@@ -48,35 +84,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
       widget.uri = null;
       print('Share Detected');
       WidgetsBinding.instance.addPostFrameCallback(
-        (timeStamp) async {
-          print('Real Button Pressed');
-          if (_uriController.text != '') {
-            try {
-              setState(() {
-                downloadButton = Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: CircularProgressIndicator(),
-                );
-              });
-              vidInfo = await widget.ytServ
-                  .getVidInfo(_uriController.text)
-                  .then((value) {
-                setState(() {
-                  downloadButton = Icon(Icons.search);
-                });
-                return value;
-              });
-              print(vidInfo!.title);
-              setState(() {});
-            } catch (e) {
-              downloadButton = Icon(Icons.search);
-              GlobalMethods.snackBarError(e.toString(), context,
-                  isException: true);
-            }
-          } else {
-            GlobalMethods.snackBarError('Enter Link', context);
-          }
-        },
+        (timeStamp) async => search(),
       );
     }
     return Container(
@@ -129,38 +137,7 @@ class _AddModalPopupState extends State<AddModalPopup> {
                                   overlayColor:
                                       MaterialStateProperty.all(Colors.grey)),
                               onPressed: () async {
-                                print('Real Button Pressed');
-                                if (_uriController.text != '') {
-                                  try {
-                                    setState(() {
-                                      downloadButton = Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    });
-                                    vidInfo = await widget.ytServ
-                                        .getVidInfo(_uriController.text)
-                                        .then((value) {
-                                      setState(() {
-                                        downloadButton = Icon(Icons.search);
-                                      });
-                                      return value;
-                                    });
-                                    print(vidInfo!.title);
-                                    setState(() {});
-                                  } catch (e) {
-                                    downloadButton = Icon(Icons.search);
-                                    GlobalMethods.snackBarError(
-                                        e.toString(), context,
-                                        isException: true);
-                                  }
-                                } else {
-                                  FlutterClipboard.paste().then((value) {
-                                    setState(() {
-                                      _uriController.text = value;
-                                    });
-                                  });
-                                }
+                                await search();
                               },
                               child: downloadButton,
                             ),

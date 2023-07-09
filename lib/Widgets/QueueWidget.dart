@@ -195,7 +195,7 @@ class QueueWidgetState extends State<QueueWidget>
                   backgroundColor: Theme.of(context).colorScheme.onBackground,
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
                   color: Theme.of(context).colorScheme.onBackground,
-                  value: progress / 100,
+                  value: progress < 0 ? null : progress / 100,
                 ),
               ),
             ),
@@ -203,7 +203,7 @@ class QueueWidgetState extends State<QueueWidget>
               width: 10.w,
             ),
             Text(
-              '${progress.floor()}%',
+              progress < 0 ? '??%' : '${progress.floor()}%',
               style: TextStyle(
                 fontSize: 15.sp,
               ),
@@ -323,15 +323,14 @@ class QueueWidgetState extends State<QueueWidget>
                                         if (!isDownloading) {
                                           setState(() {
                                             isDownloading = true;
+                                            downloadStatus =
+                                                DownloadStatus.downloading;
                                             _controller.forward();
                                           });
                                           download();
                                         } else {
                                           setState(() {
                                             isDownloading = false;
-                                            // downloadButtonWidth = 75;
-                                            downloadStatus =
-                                                DownloadStatus.waiting;
                                           });
                                           rc!.close();
                                           DownloadManager.stop(
@@ -341,6 +340,10 @@ class QueueWidgetState extends State<QueueWidget>
                                               temps!,
                                               stopPort,
                                               conversionSession);
+                                          setState(() {
+                                            downloadStatus =
+                                                DownloadStatus.waiting;
+                                          });
                                           _controller.reverse();
                                         }
                                       },

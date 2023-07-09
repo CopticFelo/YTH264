@@ -22,9 +22,10 @@ class YoutubeService {
     // Get Video Streams that are mp4
     Map<String, VideoOnlyStreamInfo> vids = {};
     for (var stream in vidStream.videoOnly) {
-      if ((!vids.keys.contains(stream.qualityLabel)) ||
-          (vids[stream.qualityLabel]!.container != StreamContainer.mp4)) {
-        vids[stream.qualityLabel] = stream;
+      String quality = stream.videoResolution.height.toString() + 'p';
+      if (((!vids.keys.contains(quality)) ||
+          (vids[quality]!.container != StreamContainer.mp4))) {
+        vids[quality] = stream;
       }
     }
     // Just get the highest quality one (Audio Quality doesn't really matter)

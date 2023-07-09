@@ -16,41 +16,61 @@ class DownloadManager {
   @pragma('vm:entry-point')
   static void donwloadVideoFromYoutube(Map<String, dynamic> args) async {
     final SendPort sd = args['port'];
+
     ReceivePort rc = ReceivePort();
     sd.send([rc.sendPort]);
+
     rc.listen(((message) {
       Isolate.exit();
     }));
-    print('Starting Download');
+
     final yt = YoutubeExplode();
+
     double progress = 0;
+
     String title = args['ytObj'].validTitle as String;
-    // print(title);
+
     if (args['ytObj'].downloadType == DownloadType.VideoOnly ||
         args['ytObj'].downloadType == DownloadType.Muxed) {
       try {
         var stream = yt.videos.streamsClient.get(args['ytObj'].stream);
         final size = args['ytObj'].stream.size.totalBytes;
+
         var count = 0;
         String? fileDir;
         Directory? directory;
+
         if (args['ytObj'].downloadType == DownloadType.VideoOnly) {
           directory = args['downloads'];
+          fileDir =
+              '${directory!.path}/${title}.${args['ytObj'].stream.container.name}';
         } else {
           directory = args['temp'];
+          fileDir =
+              '${directory!.path}/${title}-V.${args['ytObj'].stream.container.name}';
         }
-        fileDir =
-            '${directory!.path}/$title.${args['ytObj'].stream.container.name}';
+        print('Video: $fileDir');
+
         File vidFile = await File(fileDir).create(recursive: true);
+
         var fileStream = vidFile.openWrite(mode: FileMode.writeOnlyAppend);
+
         await for (var bytes in stream) {
           fileStream.add(bytes);
+
           count += bytes.length;
-          var currentProgress = ((count / size) * 100);
-          progress = currentProgress;
-          if (args['ytObj'].downloadType == DownloadType.Muxed) {
-            currentProgress = progress / 2;
+          var currentProgress =
+              ((count / size) * 100).isInfinite || ((count / size) * 100).isNaN
+                  ? -1.0
+                  : ((count / size) * 100);
+
+          if (currentProgress >= 0) {
+            progress = currentProgress;
+            if (args['ytObj'].downloadType == DownloadType.Muxed) {
+              currentProgress = progress / 2;
+            }
           }
+
           print(currentProgress);
           sd.send([DownloadStatus.downloading, currentProgress]);
         }
@@ -65,6 +85,7 @@ class DownloadManager {
         final audioStream =
             yt.videos.streamsClient.get(args['ytObj'].bestAudio);
         final size = args['ytObj'].bestAudio.size.totalBytes;
+
         var count = 0;
         String? fileDir;
         Directory? directory;
@@ -72,18 +93,29 @@ class DownloadManager {
         directory = args['temp'];
 
         fileDir =
-            '${directory!.path}/$title.${args['ytObj'].bestAudio.container.name}';
+            '${directory!.path}/${title}-A.${args['ytObj'].bestAudio.container.name}';
+
         File audFile = await File(fileDir).create(recursive: true);
+
         var fileStream =
             await audFile.openWrite(mode: FileMode.writeOnlyAppend);
+
         await for (var bytes in audioStream) {
           fileStream.add(bytes);
+
           count += bytes.length;
-          double currentProgress = ((count / size) * 100);
-          progress = 100 + currentProgress;
-          if (args['ytObj'].downloadType == DownloadType.Muxed) {
-            currentProgress = progress / 2;
+          double currentProgress =
+              ((count / size) * 100).isInfinite || ((count / size) * 100).isNaN
+                  ? -1.0
+                  : ((count / size) * 100);
+
+          if (currentProgress >= 0) {
+            progress = 100 + currentProgress;
+            if (args['ytObj'].downloadType == DownloadType.Muxed) {
+              currentProgress = progress / 2;
+            }
           }
+
           print(currentProgress);
           sd.send([DownloadStatus.downloading, currentProgress]);
         }
@@ -113,7 +145,7 @@ class DownloadManager {
     File? imgfile = await getImageAsFile(ytobj.thumbnail, imgPath);
 
     String audioDir =
-        "${temp.path}/${ytobj.validTitle}.${ytobj.bestAudio.container.name}";
+        "${temp.path}/${ytobj.validTitle}-A.${ytobj.bestAudio.container.name}";
 
     String author = ytobj.author;
 
@@ -154,13 +186,6 @@ class DownloadManager {
         clean(ytobj, downloads, temp, true);
       }
 
-      // try {
-      //   await old.delete();
-      // } catch (e) {}
-      // if (imgfile != null) {
-      //   await imgfile.delete();
-      // }
-
       clean(ytobj, downloads, temp, false);
 
       callBack();
@@ -178,9 +203,9 @@ class DownloadManager {
       Function callBack,
       BuildContext context) async {
     String audioDir =
-        "${temps!.path}/${ytobj.validTitle}.${ytobj.bestAudio.container.name}";
+        "${temps!.path}/${ytobj.validTitle}-A.${ytobj.bestAudio.container.name}";
 
-    String videoDir = "${temps.path}/${ytobj.validTitle}.mp4";
+    String videoDir = "${temps.path}/${ytobj.validTitle}-V.mp4";
 
     String outDir = "${downloads!.path}/${ytobj.validTitle}.mp4";
 
@@ -253,7 +278,7 @@ class DownloadManager {
       Directory temps, bool cleanOutFile) async {
     if (queueObject.downloadType == DownloadType.AudioOnly) {
       String path =
-          '${downloads.path}/${queueObject.validTitle}.${queueObject.bestAudio.container.name}';
+          '${downloads.path}/${queueObject.validTitle}-A.${queueObject.bestAudio.container.name}';
       File file = File(path);
 
       String imgPath = '${temps.path}/${queueObject.validTitle}.jpg';
@@ -278,10 +303,11 @@ class DownloadManager {
         await file.delete();
       } catch (e) {}
     } else {
-      String pathToVid = '${temps.path}/${queueObject.validTitle}.mp4';
+      String pathToVid = '${temps.path}/${queueObject.validTitle}-V.mp4';
       File vidfile = File(pathToVid);
 
-      String pathToAud = '${temps.path}/${queueObject.validTitle}.webm';
+      String pathToAud =
+          '${temps.path}/${queueObject.validTitle}-A.${queueObject.bestAudio.container.name}';
       File audfile = File(pathToAud);
 
       String pathToOut = '${downloads.path}/${queueObject.validTitle}.mp4';
