@@ -31,7 +31,6 @@ environment:
 dependencies:
     youtube_explode_dart:
     provider:
-    path_provider:
     ffmpeg_kit_flutter_full:
     flutter:
         sdk: flutter
@@ -39,14 +38,14 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-    cupertino_icons: ^1.0.2
-    remove_emoji: ^0.0.7
-    another_flushbar: ^1.12.29
-    permission_handler: ^10.2.0
-    receive_sharing_intent: ^1.4.5
-    shared_preferences: ^2.1.1
-    google_fonts: ^4.0.4
-    flutter_screenutil: ^5.8.4
+    cupertino_icons:
+    remove_emoji:
+    another_flushbar:
+    permission_handler:
+    receive_sharing_intent:
+    shared_preferences:
+    google_fonts:
+    flutter_screenutil:
     clipboard:
 
 dev_dependencies:

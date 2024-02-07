@@ -1,17 +1,18 @@
 PODS:
-  - ffmpeg-kit-ios-full (5.1)
-  - ffmpeg_kit_flutter_full (5.1.0):
-    - ffmpeg_kit_flutter_full/full (= 5.1.0)
+  - ffmpeg-kit-ios-full (6.0)
+  - ffmpeg_kit_flutter_full (6.0.3):
+    - ffmpeg_kit_flutter_full/full (= 6.0.3)
     - Flutter
-  - ffmpeg_kit_flutter_full/full (5.1.0):
-    - ffmpeg-kit-ios-full (= 5.1)
+  - ffmpeg_kit_flutter_full/full (6.0.3):
+    - ffmpeg-kit-ios-full (= 6.0)
     - Flutter
   - Flutter (1.0.0)
-  - path_provider_ios (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
-  - permission_handler_apple (9.0.4):
+    - FlutterMacOS
+  - permission_handler_apple (9.1.1):
     - Flutter
-  - receive_sharing_intent (0.0.1):
+  - receive_sharing_intent (1.6.7):
     - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
@@ -20,10 +21,10 @@ PODS:
 DEPENDENCIES:
   - ffmpeg_kit_flutter_full (from `.symlinks/plugins/ffmpeg_kit_flutter_full/ios`)
   - Flutter (from `Flutter`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
-  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -34,24 +35,24 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/ffmpeg_kit_flutter_full/ios"
   Flutter:
     :path: Flutter
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
   shared_preferences_foundation:
-    :path: ".symlinks/plugins/shared_preferences_foundation/ios"
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
 SPEC CHECKSUMS:
-  ffmpeg-kit-ios-full: 4a02624db22a9ea1e92e3b6707bffe67c76f4aad
-  ffmpeg_kit_flutter_full: b68e3ec78737630f790d1eca5ea50f52044645ee
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
-  permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
-  receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
-  shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
+  ffmpeg-kit-ios-full: 0099a769d22114dde52cdc238397941c32f75d27
+  ffmpeg_kit_flutter_full: a2ad4ff5b14b7c040724edc8cd3bc293dd2d6d0f
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
+  permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
+  receive_sharing_intent: 9ca20ae908f83c36ddaaaa8c9bd30ce4700495e8
+  shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
 
-PODFILE CHECKSUM: 092ae9c2a47c76ce425f69283e41653ad4ba0983
+PODFILE CHECKSUM: edb58d033154b924a635921e2a5c0c322c3e2ea6
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.0

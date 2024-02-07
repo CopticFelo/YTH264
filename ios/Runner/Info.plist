@@ -51,6 +51,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>AppGroupId</key>
+	<string>$(CUSTOM_GROUP_ID)</string>
 	<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
@@ -58,10 +60,9 @@
 				<string>Editor</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<string>ShareMedia</string>
+					<string>ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 				</array>
 			</dict>
-			<dict/>
 		</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 		<string>To upload photos, please allow permission to access your photo library.</string>

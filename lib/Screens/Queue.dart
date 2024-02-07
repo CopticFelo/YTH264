@@ -29,19 +29,20 @@ class _QueuePageState extends State<QueuePage> {
   void initState() {
     super.initState();
     _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) {
+        ReceiveSharingIntent.getMediaStream().listen((value) {
       setState(() {
-        _sharedText = value;
+        _sharedText = value[0].path;
         print("Shared: $_sharedText");
       });
-    }, onError: (err) {
-      print("getLinkStream error: $err");
-    });
-    ReceiveSharingIntent.getInitialText().then((String? value) {
-      setState(() {
-        _sharedText = value;
-        print("Shared: $_sharedText");
-      });
+    }, onError: (err) => print("ShareError: $err"));
+    ReceiveSharingIntent.getInitialMedia().then((value) {
+      if (value.isNotEmpty) {
+        setState(() {
+          _sharedText = value[0].path;
+          print("Shared: $_sharedText");
+        });
+      }
+      ReceiveSharingIntent.reset();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => loadList());
   }
