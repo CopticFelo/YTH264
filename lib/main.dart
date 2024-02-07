@@ -41,7 +41,7 @@ class _VividAppState extends State<VividApp> {
                       background: Colors.white,
                       onBackground: Color.fromARGB(150, 235, 235, 235),
                       surface: Colors.white,
-                      onSurface: const Color.fromARGB(100, 235, 235, 235))),
+                      onSurface: Colors.black)),
               home: QueuePage());
         });
   }
