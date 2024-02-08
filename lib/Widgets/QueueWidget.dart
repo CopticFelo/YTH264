@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:YT_H264/Models/QueueModel.dart';
 import 'package:YT_H264/Services/GlobalMethods.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_session.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:YT_H264/Services/DownloadManager.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 // Enum describing the varoius states of the download
 enum DownloadStatus { waiting, inQueue, downloading, converting, done, error }
@@ -45,13 +47,9 @@ class QueueWidget extends StatefulWidget {
   // index of the widget
   final index;
   // function to remove from Download List
-  final Function rmov;
+  // final Function rmov;
 
-  QueueWidget(
-      {super.key,
-      required this.ytobj,
-      required this.index,
-      required this.rmov});
+  QueueWidget({super.key, required this.ytobj, required this.index});
 
   @override
   State<QueueWidget> createState() => QueueWidgetState();
@@ -370,7 +368,10 @@ class QueueWidgetState extends State<QueueWidget>
                                             size: 16.w,
                                           ),
                                         ),
-                                        onTap: () => widget.rmov(widget.index)),
+                                        onTap: () => Provider.of<QueueModel>(
+                                                context,
+                                                listen: false)
+                                            .delete(widget.index)),
                                   ),
                                 ),
                               ),

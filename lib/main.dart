@@ -1,7 +1,9 @@
 import 'dart:ui';
+import 'package:YT_H264/Models/QueueModel.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'Screens/Queue.dart';
 
 void main() {
@@ -42,7 +44,9 @@ class _VividAppState extends State<VividApp> {
                       onBackground: Color.fromARGB(150, 235, 235, 235),
                       surface: Colors.white,
                       onSurface: Colors.black)),
-              home: QueuePage());
+              home: ChangeNotifierProvider(
+                  create: (context) => QueueModel(),
+                  builder: (context, child) => QueuePage()));
         });
   }
 }
