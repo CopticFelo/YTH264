@@ -114,14 +114,21 @@ class _AddModalPopupState extends State<AddModalPopup> {
                               color: Theme.of(context).colorScheme.onPrimary,
                               borderRadius: BorderRadius.circular(20)),
                           width: MediaQuery.of(context).size.width * 0.75,
-                          height: 55,
                           child: TextFormField(
+                            maxLines: 1,
                             controller: _uriController,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 13.0, horizontal: 16.0),
                                 hintStyle: TextStyle(
                                     color: Colors.black, fontSize: 16),
                                 hintText: 'Enter Youtube URL',
-                                border: OutlineInputBorder()),
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    borderSide: const BorderSide(
+                                        color: Colors.black, width: 1.5)),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20))),
                           )),
                       Padding(
                         padding: const EdgeInsets.all(0.0),
