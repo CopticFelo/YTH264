@@ -4,8 +4,9 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:http/http.dart' as http;
 
 class YoutubeService {
-  final _serv = YoutubeExplode();
   Future<YoutubeQueueObject> getVidInfo(String uri) async {
+    // inits the service
+    final _serv = YoutubeExplode();
     // if original string contains with music. remove it
     if (uri.contains('music.')) {
       uri = uri.replaceFirst('music.', '');

@@ -8,7 +8,6 @@ import 'package:clipboard/clipboard.dart';
 // ignore: must_be_immutable
 class AddModalPopup extends StatefulWidget {
   String? uri;
-  final YoutubeService ytServ = YoutubeService();
   AddModalPopup({super.key, this.uri});
 
   @override
@@ -57,8 +56,8 @@ class _AddModalPopupState extends State<AddModalPopup> {
             ),
           );
         });
-        vidInfo =
-            await widget.ytServ.getVidInfo(_uriController.text).then((value) {
+        YoutubeService serv = YoutubeService();
+        vidInfo = await serv.getVidInfo(_uriController.text).then((value) {
           setState(() {
             isSearching = false;
             downloadButton = Icon(Icons.search);
