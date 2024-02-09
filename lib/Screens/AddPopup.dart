@@ -49,9 +49,12 @@ class _AddModalPopupState extends State<AddModalPopup> {
       try {
         setState(() {
           isSearching = true;
-          downloadButton = Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: CircularProgressIndicator(),
+          downloadButton = Center(
+            child: Container(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(),
+            ),
           );
         });
         vidInfo =
