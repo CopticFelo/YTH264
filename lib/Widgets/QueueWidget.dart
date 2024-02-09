@@ -6,6 +6,7 @@ import 'dart:isolate';
 
 import 'package:YT_H264/Models/QueueModel.dart';
 import 'package:YT_H264/Services/GlobalMethods.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -85,14 +86,30 @@ class QueueWidgetState extends State<QueueWidget>
 
   // Function to start the download
   void download() async {
-    // Assigns the Recieveport fo the Isolate
+    // Assigns the Receiveport fo the Isolate
     rc = ReceivePort();
-    // This is just makes sure read/write is permited
-    final storagePermissions = await Permission.storage.status;
-    if (!storagePermissions.isGranted) {
-      if (await Permission.storage.request().isDenied) {
-        GlobalMethods.snackBarError('App Needs Storage Permissions', context);
-        return;
+    // This is just makes sure read/write is permitted on Android 12 and below
+    // No need to on Android 13+ and IOS
+    if (Platform.isAndroid) {
+      DeviceInfoPlugin info = DeviceInfoPlugin();
+      AndroidDeviceInfo androidInfo = await info.androidInfo;
+      if (androidInfo.version.sdkInt < 33) {
+        final storagePermissions = await Permission.storage.status;
+        if (!storagePermissions.isGranted) {
+          if (await Permission.storage.request().isDenied) {
+            GlobalMethods.snackBarError(
+                'App Needs Storage Permissions', context);
+            setState(() {
+              isDownloading = false;
+            });
+            rc!.close();
+            setState(() {
+              downloadStatus = DownloadStatus.waiting;
+            });
+            _controller.reverse();
+            return;
+          }
+        }
       }
     }
     // Status: Downloading

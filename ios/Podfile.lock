@@ -1,4 +1,6 @@
 PODS:
+  - device_info_plus (0.0.1):
+    - Flutter
   - ffmpeg-kit-ios-full (6.0)
   - ffmpeg_kit_flutter_full (6.0.3):
     - ffmpeg_kit_flutter_full/full (= 6.0.3)
@@ -19,6 +21,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ffmpeg_kit_flutter_full (from `.symlinks/plugins/ffmpeg_kit_flutter_full/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -31,6 +34,8 @@ SPEC REPOS:
     - ffmpeg-kit-ios-full
 
 EXTERNAL SOURCES:
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
   ffmpeg_kit_flutter_full:
     :path: ".symlinks/plugins/ffmpeg_kit_flutter_full/ios"
   Flutter:
@@ -45,6 +50,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
 SPEC CHECKSUMS:
+  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   ffmpeg-kit-ios-full: 0099a769d22114dde52cdc238397941c32f75d27
   ffmpeg_kit_flutter_full: a2ad4ff5b14b7c040724edc8cd3bc293dd2d6d0f
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
@@ -55,4 +61,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: edb58d033154b924a635921e2a5c0c322c3e2ea6
 
-COCOAPODS: 1.15.0
+COCOAPODS: 1.15.2
