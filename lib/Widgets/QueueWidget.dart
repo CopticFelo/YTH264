@@ -268,10 +268,29 @@ class QueueWidgetState extends State<QueueWidget>
                 visible: MediaQuery.of(context).size.width > 350 ? true : false,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.network(
-                    widget.ytobj.thumbnail,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.network(widget.ytobj.thumbnail,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+                        return Container(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => Container(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            child: Center(
+                              child: Text(
+                                ". .-. .-. --- .-.",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                            ),
+                          )),
                 ),
               ),
             ),
