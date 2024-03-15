@@ -13,22 +13,38 @@ class DownloadOptions extends StatefulWidget {
 
 class _DownloadOptionsState extends State<DownloadOptions>
     with TickerProviderStateMixin {
-  int downloadType = 0;
-  int videoQuality = 0;
-  int audioQuality = 0;
-  late TabController downloadTypeController;
-  late TabController videoQualityController;
-  late TabController audioQualityController;
+  List<String> _types = ["Both", "Video only", "Audio only"];
+  late List<String> _qualities;
+  late List<VideoOnlyStreamInfo> _res;
+
+  int _downloadType = 0;
+  int _videoQuality = 0;
   @override
   void initState() {
     super.initState();
-    downloadTypeController = TabController(length: 3, vsync: this);
-    videoQualityController = TabController(length: 3, vsync: this);
-    audioQualityController = TabController(length: 3, vsync: this);
   }
 
   Widget getVideoQualties() {
-    if ((downloadType == 0 || downloadType == 1) &&
+    _qualities = [
+      widget.ytObj!.videoOnlyStreams.keys.first,
+      widget.ytObj!.videoOnlyStreams.length < 6
+          ? widget.ytObj!.videoOnlyStreams.keys.elementAt(1)
+          : widget.ytObj!.videoOnlyStreams.keys.elementAt(2),
+      widget.ytObj!.videoOnlyStreams.length < 6
+          ? widget.ytObj!.videoOnlyStreams.keys.elementAt(2)
+          : widget.ytObj!.videoOnlyStreams.keys.elementAt(4)
+    ];
+
+    _res = [
+      widget.ytObj!.videoOnlyStreams.values.first,
+      widget.ytObj!.videoOnlyStreams.length < 6
+          ? widget.ytObj!.videoOnlyStreams.values.elementAt(1)
+          : widget.ytObj!.videoOnlyStreams.values.elementAt(2),
+      widget.ytObj!.videoOnlyStreams.length < 6
+          ? widget.ytObj!.videoOnlyStreams.values.elementAt(2)
+          : widget.ytObj!.videoOnlyStreams.values.elementAt(4)
+    ];
+    if ((_downloadType == 0 || _downloadType == 1) &&
         widget.ytObj!.videoOnlyStreams.length >= 3) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,68 +59,48 @@ class _DownloadOptionsState extends State<DownloadOptions>
                   fontWeight: FontWeight.bold,
                   fontSize: 27)),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 14, 48, 8),
+            padding: const EdgeInsets.fromLTRB(0, 14, 90, 8),
             child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Theme.of(context).colorScheme.onBackground,
-              ),
-              child: TabBar(
-                  controller: videoQualityController,
-                  onTap: (value) {
-                    setState(() {
-                      VideoOnlyStreamInfo info;
-                      if (value == 0) {
-                        info = widget.ytObj!.videoOnlyStreams.values.first;
-                      } else if (value == 1) {
-                        info = widget.ytObj!.videoOnlyStreams.length < 6
-                            ? widget.ytObj!.videoOnlyStreams.values.elementAt(1)
-                            : widget.ytObj!.videoOnlyStreams.values
-                                .elementAt(2);
-                      } else {
-                        info = widget.ytObj!.videoOnlyStreams.length < 6
-                            ? widget.ytObj!.videoOnlyStreams.values.elementAt(2)
-                            : widget.ytObj!.videoOnlyStreams.values
-                                .elementAt(4);
-                      }
-                      widget.ytObj!.selectedStream = info;
-                    });
-                    print(videoQuality);
-                  },
-                  unselectedLabelColor: Colors.black,
-                  labelColor: Colors.white,
-                  indicator: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(20),
-                      shape: BoxShape.rectangle),
-                  tabs: [
-                    SizedBox(
-                      width: 83,
-                      height: 32,
-                      child: Center(
-                          child:
-                              Text(widget.ytObj!.videoOnlyStreams.keys.first)),
-                    ),
-                    SizedBox(
-                      width: 83,
-                      height: 32,
-                      child: Center(
-                          child: Text(widget.ytObj!.videoOnlyStreams.length < 6
-                              ? widget.ytObj!.videoOnlyStreams.keys.elementAt(1)
-                              : widget.ytObj!.videoOnlyStreams.keys
-                                  .elementAt(2))),
-                    ),
-                    SizedBox(
-                      width: 83,
-                      height: 32,
-                      child: Center(
-                          child: Text(widget.ytObj!.videoOnlyStreams.length < 6
-                              ? widget.ytObj!.videoOnlyStreams.keys.elementAt(2)
-                              : widget.ytObj!.videoOnlyStreams.keys
-                                  .elementAt(4))),
-                    ),
-                  ]),
-            ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).colorScheme.onBackground,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List<Widget>.generate(
+                      3,
+                      (index) => ChoiceChip(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.onPrimary,
+                            side: BorderSide.none,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 0),
+                            labelPadding: EdgeInsets.all(4.0),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            elevation: 0.0,
+                            showCheckmark: false,
+                            label: Text(
+                              _qualities[index],
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  color: index == _videoQuality
+                                      ? Colors.white
+                                      : Colors.black),
+                            ),
+                            selected: index == _videoQuality,
+                            onSelected: (value) {
+                              setState(() {
+                                _videoQuality = index;
+                                widget.ytObj!.selectedStream = _res[index];
+                              });
+                              print(index);
+                            },
+                          )),
+                )),
           )
         ],
       );
@@ -174,46 +170,51 @@ class _DownloadOptionsState extends State<DownloadOptions>
                               fontWeight: FontWeight.bold,
                               fontSize: 27)),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 14, 48, 8),
+                        padding: const EdgeInsets.fromLTRB(0, 14, 70, 8),
                         child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Theme.of(context).colorScheme.onBackground,
-                          ),
-                          child: TabBar(
-                              controller: downloadTypeController,
-                              onTap: (value) {
-                                setState(() {
-                                  downloadType = value;
-                                  widget.ytObj!.type =
-                                      DownloadType.values[downloadType];
-                                });
-                                print(downloadType);
-                              },
-                              unselectedLabelColor: Colors.black,
-                              labelColor: Colors.white,
-                              indicator: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(20),
-                                  shape: BoxShape.rectangle),
-                              tabs: const [
-                                SizedBox(
-                                  width: 83,
-                                  height: 32,
-                                  child: Center(child: Text('Both')),
-                                ),
-                                SizedBox(
-                                  width: 83,
-                                  height: 32,
-                                  child: Center(child: Text('Video')),
-                                ),
-                                SizedBox(
-                                  width: 83,
-                                  height: 32,
-                                  child: Center(child: Text('Audio')),
-                                ),
-                              ]),
-                        ),
+                            alignment: Alignment.centerLeft,
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                borderRadius: BorderRadius.circular(20)),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List<Widget>.generate(
+                                  3,
+                                  (index) => ChoiceChip(
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
+                                        side: BorderSide.none,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 0),
+                                        labelPadding: EdgeInsets.all(4.0),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                        elevation: 0.0,
+                                        showCheckmark: false,
+                                        label: Text(
+                                          _types[index],
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              color: index == _downloadType
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                        selected: index == _downloadType,
+                                        onSelected: (value) {
+                                          setState(() {
+                                            _downloadType = index;
+                                            widget.ytObj!.type = DownloadType
+                                                .values[_downloadType];
+                                          });
+                                          print(_downloadType);
+                                        },
+                                      )),
+                            )),
                       ),
                       getVideoQualties(),
                       const SizedBox(height: 80),
