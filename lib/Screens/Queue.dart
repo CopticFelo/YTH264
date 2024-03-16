@@ -126,7 +126,7 @@ class _QueuePageState extends State<QueuePage> {
                           model.downloadQueue.add(value as YoutubeQueueObject);
                         });
                         SchedulerBinding.instance.addPostFrameCallback((_) {
-                          value.add(value);
+                          model.add(value);
                         });
                         return;
                       }
