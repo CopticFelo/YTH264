@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Services/QueueObject.dart';
 import '../Widgets/QueueWidget.dart';
 
-class QueueModel extends ChangeNotifier {
+class QueueModel with ChangeNotifier {
   final GlobalKey<AnimatedListState> listkey = GlobalKey<AnimatedListState>();
-  List<YoutubeQueueObject> downloadQueue = [];
+  List<YoutubeQueueObject> _downloadQueue = [];
   List<GlobalKey<QueueWidgetState>> keys = [];
+  bool isEmpty = true;
+
+  List<YoutubeQueueObject> get queue {
+    return _downloadQueue;
+  }
 
   void delete(int index) {
-    QueueObject obj = downloadQueue[index];
+    QueueObject obj = _downloadQueue[index];
     listkey.currentState!.removeItem(
         index,
         ((context, animation) => SlideTransition(
@@ -23,7 +29,8 @@ class QueueModel extends ChangeNotifier {
             )),
         duration: Duration(milliseconds: 100));
     keys.removeAt(index);
-    downloadQueue.removeAt(index);
+    _downloadQueue.removeAt(index);
+    isEmpty = _downloadQueue.isEmpty;
     saveList();
     notifyListeners();
   }
@@ -32,16 +39,17 @@ class QueueModel extends ChangeNotifier {
     keys.add(GlobalKey<QueueWidgetState>());
     Duration time = Duration(milliseconds: fromJson ? 0 : 100);
     listkey.currentState!.insertItem(
-        index != null ? index : downloadQueue.length - 1,
+        index != null ? index : _downloadQueue.length,
         duration: time);
     if (!fromJson) {
+      _downloadQueue.add(queueObject as YoutubeQueueObject);
       saveList();
     }
   }
 
   void saveList() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String encodedData = YoutubeQueueObject.encode(downloadQueue);
+    final String encodedData = YoutubeQueueObject.encode(_downloadQueue);
     await prefs.setString('Queue', encodedData);
   }
 
@@ -51,13 +59,14 @@ class QueueModel extends ChangeNotifier {
     final String? jsonString = await prefs.getString('Queue');
     print(jsonString);
     if (jsonString != null) {
-      downloadQueue = YoutubeQueueObject.decode(jsonString);
+      _downloadQueue = YoutubeQueueObject.decode(jsonString);
       // to init the animated list
-      if (downloadQueue.isNotEmpty) {
+      if (_downloadQueue.isNotEmpty) {
+        isEmpty = false;
         notifyListeners();
         SchedulerBinding.instance.addPostFrameCallback((_) {
           int index = 0;
-          for (var element in downloadQueue) {
+          for (var element in _downloadQueue) {
             add(element, fromJson: true, index: index);
             index++;
           }
@@ -66,8 +75,8 @@ class QueueModel extends ChangeNotifier {
       }
 
       int index = 0;
-      print(downloadQueue.length);
-      for (var element in downloadQueue) {
+      print(_downloadQueue.length);
+      for (var element in _downloadQueue) {
         add(element, fromJson: true, index: index);
         index++;
       }
