@@ -13,12 +13,13 @@ class DownloadOptions extends StatefulWidget {
 
 class _DownloadOptionsState extends State<DownloadOptions>
     with TickerProviderStateMixin {
-  List<String> _types = ["Both", "Video only", "Audio only"];
+  List<String> _types = ["Muxed", "VideoOnly", "AudioOnly"];
+  List<String> _typenames = ["Both", "Video only", "Audio only"];
   late List<String> _qualities;
   late List<VideoOnlyStreamInfo> _res;
 
-  int _downloadType = 0;
-  int _videoQuality = 0;
+  Set<String> _downloadType = {"Muxed"};
+  Set<String>? _videoQuality = null;
   @override
   void initState() {
     super.initState();
@@ -44,7 +45,11 @@ class _DownloadOptionsState extends State<DownloadOptions>
           ? widget.ytObj!.videoOnlyStreams.values.elementAt(2)
           : widget.ytObj!.videoOnlyStreams.values.elementAt(4)
     ];
-    if ((_downloadType == 0 || _downloadType == 1) &&
+    if (_videoQuality == null) {
+      _videoQuality = {_qualities[0]};
+    }
+    if ((_downloadType.first == "Muxed" ||
+            _downloadType.first == "VideoOnly") &&
         widget.ytObj!.videoOnlyStreams.length >= 3) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,46 +66,59 @@ class _DownloadOptionsState extends State<DownloadOptions>
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 14, 90, 8),
             child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Theme.of(context).colorScheme.onBackground,
+                child: SegmentedButton(
+              showSelectedIcon: false,
+              onSelectionChanged: (p0) {
+                setState(() {
+                  widget.ytObj!.selectedStream =
+                      widget.ytObj!.videoOnlyStreams[p0.first]!;
+                  _videoQuality = p0;
+                });
+              },
+              selected: _videoQuality!,
+              segments: List.generate(
+                  3,
+                  (index) => ButtonSegment<String>(
+                      value: _qualities[index],
+                      label: Text(_qualities[index]))),
+            )
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: List<Widget>.generate(
+                //       3,
+                //       (index) => ChoiceChip(
+                //             backgroundColor:
+                //                 Theme.of(context).colorScheme.onPrimary,
+                //             side: BorderSide.none,
+                //             materialTapTargetSize:
+                //                 MaterialTapTargetSize.shrinkWrap,
+                //             padding: EdgeInsets.symmetric(
+                //                 horizontal: 12, vertical: 0),
+                //             labelPadding: EdgeInsets.all(4.0),
+                //             shape: RoundedRectangleBorder(
+                //                 borderRadius: BorderRadius.circular(20)),
+                //             elevation: 0.0,
+                //             showCheckmark: false,
+                //             label: Text(
+                //               _qualities[index],
+                //               style: TextStyle(
+                //                   fontWeight: FontWeight.w500,
+                //                   fontSize: 16,
+                //                   color: index == _videoQuality
+                //                       ? Colors.white
+                //                       : Colors.black),
+                //             ),
+                //             selected: index == _videoQuality,
+                //             onSelected: (value) {
+                //               setState(() {
+                //                 _videoQuality = index;
+                //                 widget.ytObj!.selectedStream = _res[index];
+                //               });
+                //               print(index);
+                //             },
+                //           )),
+                // )
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List<Widget>.generate(
-                      3,
-                      (index) => ChoiceChip(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.onPrimary,
-                            side: BorderSide.none,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 0),
-                            labelPadding: EdgeInsets.all(4.0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
-                            elevation: 0.0,
-                            showCheckmark: false,
-                            label: Text(
-                              _qualities[index],
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
-                                  color: index == _videoQuality
-                                      ? Colors.white
-                                      : Colors.black),
-                            ),
-                            selected: index == _videoQuality,
-                            onSelected: (value) {
-                              setState(() {
-                                _videoQuality = index;
-                                widget.ytObj!.selectedStream = _res[index];
-                              });
-                              print(index);
-                            },
-                          )),
-                )),
           )
         ],
       );
@@ -170,51 +188,67 @@ class _DownloadOptionsState extends State<DownloadOptions>
                               fontWeight: FontWeight.bold,
                               fontSize: 27)),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 14, 70, 8),
+                        padding: const EdgeInsets.fromLTRB(0, 14, 0, 8),
                         child: Container(
-                            alignment: Alignment.centerLeft,
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                borderRadius: BorderRadius.circular(20)),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List<Widget>.generate(
-                                  3,
-                                  (index) => ChoiceChip(
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary,
-                                        side: BorderSide.none,
-                                        materialTapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 0),
-                                        labelPadding: EdgeInsets.all(4.0),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        elevation: 0.0,
-                                        showCheckmark: false,
-                                        label: Text(
-                                          _types[index],
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                              color: index == _downloadType
-                                                  ? Colors.white
-                                                  : Colors.black),
-                                        ),
-                                        selected: index == _downloadType,
-                                        onSelected: (value) {
-                                          setState(() {
-                                            _downloadType = index;
-                                            widget.ytObj!.type = DownloadType
-                                                .values[_downloadType];
-                                          });
-                                          print(_downloadType);
-                                        },
-                                      )),
-                            )),
+                          alignment: Alignment.centerLeft,
+                          child: SegmentedButton(
+                            showSelectedIcon: false,
+                            selected: _downloadType,
+                            segments: List<ButtonSegment<String>>.generate(
+                                3,
+                                (index) => ButtonSegment<String>(
+                                      value: _types[index],
+                                      label: Text(_typenames[index]),
+                                    )),
+                            onSelectionChanged: (p0) {
+                              setState(() {
+                                widget.ytObj!.type = DownloadType.values
+                                    .byName(_downloadType.first);
+                                _downloadType = p0;
+                              });
+                            },
+                          ),
+                          // child: Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   children:
+                          // List<Widget>.generate(
+                          //     3,
+                          //     (index) => ChoiceChip(
+                          //           backgroundColor: Theme.of(context)
+                          //               .colorScheme
+                          //               .onPrimary,
+                          //           side: BorderSide.none,
+                          //           materialTapTargetSize:
+                          //               MaterialTapTargetSize.shrinkWrap,
+                          //           padding: EdgeInsets.symmetric(
+                          //               horizontal: 12, vertical: 0),
+                          //           labelPadding: EdgeInsets.all(4.0),
+                          //           shape: RoundedRectangleBorder(
+                          //               borderRadius:
+                          //                   BorderRadius.circular(20)),
+                          //           elevation: 0.0,
+                          //           showCheckmark: false,
+                          //           label: Text(
+                          //             _types[index],
+                          //             style: TextStyle(
+                          //                 fontWeight: FontWeight.bold,
+                          //                 fontSize: 14,
+                          //                 color: index == _downloadType
+                          //                     ? Colors.white
+                          //                     : Colors.black),
+                          //           ),
+                          //           selected: index == _downloadType,
+                          //           onSelected: (value) {
+                          //             setState(() {
+                          //               _downloadType = index;
+                          // widget.ytObj!.type = DownloadType
+                          //     .values[_downloadType];
+                          //             });
+                          //             print(_downloadType);
+                          //           },
+                          //         )),
+                          // )
+                        ),
                       ),
                       getVideoQualties(),
                       const SizedBox(height: 80),
