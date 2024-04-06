@@ -89,64 +89,43 @@ class _QueuePageState extends State<QueuePage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text('YT-H264',
-            style: GoogleFonts.lato(
-                textStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: MediaQuery.of(context).size.height * 0.028))),
+        title: Text(
+          'YT-H264',
+        ),
         actions: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-                0,
-                MediaQuery.of(context).size.height * 0.01,
-                10,
-                MediaQuery.of(context).size.height * 0.01),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Consumer(
-                builder: (context, value, child) => TextButton(
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                          Theme.of(context).colorScheme.onBackground),
-                      overlayColor: MaterialStateProperty.all(
-                        Colors.grey[700],
-                      )),
-                  onPressed: () => showModalBottomSheet(
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      context: context,
-                      builder: (context) {
-                        return AddModalPopup();
-                      }).then((value) {
-                    if (value != null) {
-                      final QueueModel model =
-                          Provider.of<QueueModel>(context, listen: false);
-                      print(model.queue.isEmpty.toString());
-                      if (model.queue.isEmpty) {
-                        setState(() {
-                          model.isEmpty = false;
-                        });
-                        SchedulerBinding.instance.addPostFrameCallback((_) {
-                          model.add(value);
-                        });
-                        return;
-                      }
-                      model.add(value);
-                      print(model.queue);
-                      setState(() {});
-                    }
-                  }),
-                  child: Center(
-                    child: Text('+',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.bold,
-                            fontSize:
-                                MediaQuery.of(context).size.height * 0.017)),
-                  ),
+          Consumer(
+            builder: (context, value, child) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton.outlined(
+                icon: Icon(
+                  Icons.add,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
+                onPressed: () => showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    builder: (context) {
+                      return AddModalPopup();
+                    }).then((value) {
+                  if (value != null) {
+                    final QueueModel model =
+                        Provider.of<QueueModel>(context, listen: false);
+                    print(model.queue.isEmpty.toString());
+                    if (model.queue.isEmpty) {
+                      setState(() {
+                        model.isEmpty = false;
+                      });
+                      SchedulerBinding.instance.addPostFrameCallback((_) {
+                        model.add(value);
+                      });
+                      return;
+                    }
+                    model.add(value);
+                    print(model.queue);
+                    setState(() {});
+                  }
+                }),
               ),
             ),
           )

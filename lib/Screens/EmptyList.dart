@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class EmptyList extends StatelessWidget {
   const EmptyList({super.key});
@@ -9,24 +10,22 @@ class EmptyList extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image(image: AssetImage('assets/Sad_Magnifying_Glass.png')),
+          SvgPicture.asset(
+            'assets/Sad_Magnifying_Glass.svg',
+            colorFilter: ColorFilter.mode(
+                Theme.of(context).colorScheme.onSurface.withAlpha(100),
+                BlendMode.srcIn),
+          ),
           SizedBox(
             height: 12,
           ),
           Text(
             'No Videos to download',
-            style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-                fontFamily: 'Lato'),
-          ),
-          SizedBox(
-            height: 6,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
           Text(
             'Tap on + to add Videos to download',
-            style: TextStyle(color: Colors.black, fontSize: 17),
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
         ],
       ),
