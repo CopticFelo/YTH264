@@ -275,45 +275,54 @@ class QueueWidgetState extends State<QueueWidget>
                           : false,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(6),
-                        child: Image.network(widget.ytobj.thumbnail,
-                            alignment: Alignment.centerLeft,
-                            fit: BoxFit.scaleDown,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child;
-                              }
-                              return Container(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                  child: Center(
-                                    child: Text(
-                                      ". .-. .-. --- .-.",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15),
+                        child: Container(
+                          color: Colors.black,
+                          child: Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: Image.network(widget.ytobj.thumbnail,
+                                alignment: Alignment.centerLeft,
+                                fit: BoxFit.fill,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  }
+                                  return Container(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
                                     ),
-                                  ),
-                                )),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      child: Center(
+                                        child: Text(
+                                          ". .-. .-. --- .-.",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15),
+                                        ),
+                                      ),
+                                    )),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   SizedBox(
-                    width: 14.w,
+                    width: 8.w,
                   ),
                   Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Align(
-                          alignment: Alignment.bottomLeft,
+                          alignment: Alignment.topLeft,
                           child: SizedBox(
                               child: Text(
                             widget.ytobj.title,
@@ -322,11 +331,11 @@ class QueueWidgetState extends State<QueueWidget>
                             style: Theme.of(context).textTheme.titleSmall,
                           )),
                         ),
-                        SizedBox(height: 4.h),
+                        Divider(),
                         Align(
-                          alignment: Alignment.bottomLeft,
+                          alignment: Alignment.bottomRight,
                           child: Padding(
-                            padding: EdgeInsets.all(2.r),
+                            padding: const EdgeInsets.all(2.0),
                             child: OutlinedButton.icon(
                               label: buildStatus() ??
                                   Text(
