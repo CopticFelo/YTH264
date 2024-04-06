@@ -202,9 +202,9 @@ class _DownloadOptionsState extends State<DownloadOptions>
                                     )),
                             onSelectionChanged: (p0) {
                               setState(() {
+                                _downloadType = p0;
                                 widget.ytObj!.type = DownloadType.values
                                     .byName(_downloadType.first);
-                                _downloadType = p0;
                               });
                             },
                           ),
