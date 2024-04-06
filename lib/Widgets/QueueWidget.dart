@@ -322,66 +322,61 @@ class QueueWidgetState extends State<QueueWidget>
                             style: Theme.of(context).textTheme.titleSmall,
                           )),
                         ),
-                        SizedBox(height: 2.h),
-                        SizedBox(height: 2.h),
+                        SizedBox(height: 4.h),
                         Align(
-                          alignment: Alignment.bottomRight,
-                          child: Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.all(2.r),
-                              child: OutlinedButton.icon(
-                                label: buildStatus() ??
-                                    Text(
-                                      "Download",
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                icon: Icon(isDownloading
-                                    ? Icons.stop
-                                    : Icons.download),
-                                style: ButtonStyle(
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    minimumSize:
-                                        MaterialStateProperty.all(Size.zero),
-                                    side: MaterialStateProperty.all(BorderSide(
-                                        color: isDownloading
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onSurface)),
-                                    padding:
-                                        MaterialStateProperty.all<EdgeInsets>(
-                                            EdgeInsets.symmetric(
-                                                vertical: 8, horizontal: 10))),
-                                onPressed: () {
-                                  if (!isDownloading) {
-                                    setState(() {
-                                      isDownloading = true;
-                                      downloadStatus =
-                                          DownloadStatus.downloading;
-                                    });
-                                    download();
-                                  } else {
-                                    setState(() {
-                                      isDownloading = false;
-                                    });
-                                    rc!.close();
-                                    DownloadManager.stop(
-                                        downloadStatus,
-                                        widget.ytobj,
-                                        downloads!,
-                                        temps!,
-                                        stopPort,
-                                        conversionSession);
-                                    setState(() {
-                                      downloadStatus = DownloadStatus.waiting;
-                                    });
-                                  }
-                                },
-                              ),
+                          alignment: Alignment.bottomLeft,
+                          child: Padding(
+                            padding: EdgeInsets.all(2.r),
+                            child: OutlinedButton.icon(
+                              label: buildStatus() ??
+                                  Text(
+                                    "Download",
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                              icon: Icon(
+                                  isDownloading ? Icons.stop : Icons.download),
+                              style: ButtonStyle(
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  minimumSize:
+                                      MaterialStateProperty.all(Size.zero),
+                                  side: MaterialStateProperty.all(BorderSide(
+                                      color: isDownloading
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface)),
+                                  padding:
+                                      MaterialStateProperty.all<EdgeInsets>(
+                                          EdgeInsets.symmetric(
+                                              vertical: 8, horizontal: 10))),
+                              onPressed: () {
+                                if (!isDownloading) {
+                                  setState(() {
+                                    isDownloading = true;
+                                    downloadStatus = DownloadStatus.downloading;
+                                  });
+                                  download();
+                                } else {
+                                  setState(() {
+                                    isDownloading = false;
+                                  });
+                                  rc!.close();
+                                  DownloadManager.stop(
+                                      downloadStatus,
+                                      widget.ytobj,
+                                      downloads!,
+                                      temps!,
+                                      stopPort,
+                                      conversionSession);
+                                  setState(() {
+                                    downloadStatus = DownloadStatus.waiting;
+                                  });
+                                }
+                              },
                             ),
                           ),
                         )
