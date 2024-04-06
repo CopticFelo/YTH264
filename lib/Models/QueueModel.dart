@@ -27,7 +27,7 @@ class QueueModel with ChangeNotifier {
               child:
                   QueueWidget(ytobj: obj as YoutubeQueueObject, index: index),
             )),
-        duration: Duration(milliseconds: 100));
+        duration: Duration(milliseconds: 0));
     keys.removeAt(index);
     _downloadQueue.removeAt(index);
     isEmpty = _downloadQueue.isEmpty;

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:YT_H264/Models/QueueModel.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,33 +21,30 @@ class VividApp extends StatefulWidget {
 }
 
 class _VividAppState extends State<VividApp> {
+  final _defaultLightColorScheme =
+      ColorScheme.fromSwatch(primarySwatch: Colors.blue);
+
+  final _defaultDarkColorScheme = ColorScheme.fromSwatch(
+      primarySwatch: Colors.blue, brightness: Brightness.dark);
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: [SystemUiOverlay.top]);
-    return ScreenUtilInit(
-        designSize: const Size(390, 844),
-        builder: (context, child) {
-          return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              themeMode: ThemeMode.light,
-              theme: ThemeData(
-                  appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
-                  colorScheme: ColorScheme(
-                      brightness: Brightness.light,
-                      primary: Colors.white,
-                      onPrimary: const Color.fromARGB(100, 235, 235, 235),
-                      secondary: Colors.black,
-                      onSecondary: Colors.white,
-                      error: Colors.red[700]!,
-                      onError: Colors.white,
-                      background: Colors.white,
-                      onBackground: Color.fromARGB(150, 235, 235, 235),
-                      surface: Colors.white,
-                      onSurface: Colors.black)),
-              home: ChangeNotifierProvider(
-                  create: (context) => QueueModel(),
-                  builder: (context, child) => QueuePage()));
-        });
+    return DynamicColorBuilder(builder: (_light, _dark) {
+      return ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (context, child) {
+            return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                themeMode: ThemeMode.system,
+                theme: ThemeData.from(
+                    colorScheme: _light ?? _defaultLightColorScheme),
+                darkTheme: ThemeData.from(
+                    colorScheme: _dark ?? _defaultDarkColorScheme),
+                home: ChangeNotifierProvider(
+                    create: (context) => QueueModel(),
+                    builder: (context, child) => QueuePage()));
+          });
+    });
   }
 }

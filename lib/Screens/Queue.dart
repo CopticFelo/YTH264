@@ -89,12 +89,9 @@ class _QueuePageState extends State<QueuePage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text('YT-H264',
-            style: GoogleFonts.lato(
-                textStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: MediaQuery.of(context).size.height * 0.028))),
+        title: Text(
+          'YT-H264',
+        ),
         actions: [
           Padding(
             padding: EdgeInsets.fromLTRB(
@@ -107,11 +104,9 @@ class _QueuePageState extends State<QueuePage> {
               child: Consumer(
                 builder: (context, value, child) => TextButton(
                   style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                          Theme.of(context).colorScheme.onBackground),
                       overlayColor: MaterialStateProperty.all(
-                        Colors.grey[700],
-                      )),
+                    Colors.grey[700],
+                  )),
                   onPressed: () => showModalBottomSheet(
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
@@ -138,14 +133,9 @@ class _QueuePageState extends State<QueuePage> {
                     }
                   }),
                   child: Center(
-                    child: Text('+',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.bold,
-                            fontSize:
-                                MediaQuery.of(context).size.height * 0.017)),
-                  ),
+                      child: Text(
+                    '+',
+                  )),
                 ),
               ),
             ),
