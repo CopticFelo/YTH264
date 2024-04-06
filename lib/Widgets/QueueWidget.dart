@@ -9,6 +9,7 @@ import 'package:YT_H264/Services/GlobalMethods.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_session.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:YT_H264/Services/DownloadManager.dart';
@@ -197,34 +198,29 @@ class QueueWidgetState extends State<QueueWidget>
     print('Status: ${downloadStatus.toString()}');
     // In case of downloading just show a Progress bar
     if (downloadStatus == DownloadStatus.downloading) {
-      return Expanded(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 67.w,
-              height: 2,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  backgroundColor: Theme.of(context).colorScheme.onBackground,
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
-                  color: Theme.of(context).colorScheme.onBackground,
-                  value: progress < 0 ? null : progress / 100,
-                ),
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                backgroundColor: Theme.of(context).colorScheme.onSurface,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary),
+                color: Theme.of(context).colorScheme.onSurface,
+                value: progress < 0 ? null : progress / 100,
               ),
             ),
-            SizedBox(
-              width: 10.w,
-            ),
-            Text(
-              progress < 0 ? '??%' : '${progress.floor()}%',
-              style: TextStyle(
-                fontSize: 15.sp,
-              ),
-            )
-          ],
-        ),
+          ),
+          SizedBox(
+            width: 5.w,
+          ),
+          Text(
+            progress < 0 ? '??%' : '${progress.floor()}%',
+            style: Theme.of(context).textTheme.labelSmall,
+          )
+        ],
       );
     } else if (downloadStatus == DownloadStatus.converting) {
       return Text(
@@ -255,172 +251,151 @@ class QueueWidgetState extends State<QueueWidget>
       type = 'Audio';
     }
     // UI
+    print(MediaQuery.of(context).size.width);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: 144.w,
-              height: 80.h,
-              child: Visibility(
-                visible: MediaQuery.of(context).size.width > 350 ? true : false,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: Image.network(widget.ytobj.thumbnail,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        }
-                        return Container(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => Container(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            child: Center(
-                              child: Text(
-                                ". .-. .-. --- .-.",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 15),
-                              ),
-                            ),
-                          )),
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 10.w,
-            ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+      padding: const EdgeInsets.all(8.0),
+      child: Dismissible(
+        onDismissed: (direction) =>
+            Provider.of<QueueModel>(context, listen: false)
+                .delete(widget.index),
+        key: ValueKey(widget.index),
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                        child: Text(
-                      widget.ytobj.title,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Lato',
-                          fontSize: 11.sp),
-                    )),
-                  ),
-                  SizedBox(height: 2.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("${widget.ytobj.author} · $type",
-                          style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w200,
-                              fontSize: 9.sp)),
-                    ],
-                  ),
-                  SizedBox(height: 2.h),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        buildStatus() ?? Container(),
-                        Padding(
-                          padding: EdgeInsets.all(2.r),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              SlideTransition(
-                                position: _slide,
-                                child: ClipOval(
-                                  child: Material(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onBackground,
-                                    child: InkWell(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.r),
-                                        child: Icon(
-                                          isDownloading
-                                              ? Icons.cancel
-                                              : Icons.download,
-                                          size: 16.w,
+                  SizedBox(
+                    width: 151.w,
+                    height: 84.h,
+                    child: Visibility(
+                      visible: MediaQuery.of(context).size.width > 350
+                          ? true
+                          : false,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          color: Colors.black,
+                          child: Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: Image.network(widget.ytobj.thumbnail,
+                                alignment: Alignment.centerLeft,
+                                fit: BoxFit.fill,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  }
+                                  return Container(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      child: Center(
+                                        child: Text(
+                                          ". .-. .-. --- .-.",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15),
                                         ),
                                       ),
-                                      onTap: () {
-                                        if (!isDownloading) {
-                                          setState(() {
-                                            isDownloading = true;
-                                            downloadStatus =
-                                                DownloadStatus.downloading;
-                                            _controller.forward();
-                                          });
-                                          download();
-                                        } else {
-                                          setState(() {
-                                            isDownloading = false;
-                                          });
-                                          rc!.close();
-                                          DownloadManager.stop(
-                                              downloadStatus,
-                                              widget.ytobj,
-                                              downloads!,
-                                              temps!,
-                                              stopPort,
-                                              conversionSession);
-                                          setState(() {
-                                            downloadStatus =
-                                                DownloadStatus.waiting;
-                                          });
-                                          _controller.reverse();
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 12.w),
-                              Visibility(
-                                maintainAnimation: true,
-                                maintainState: true,
-                                maintainSize: true,
-                                visible: !isDownloading,
-                                child: ClipOval(
-                                  child: Material(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onBackground,
-                                    child: InkWell(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8.r),
-                                          child: Icon(
-                                            Icons.delete_rounded,
-                                            size: 16.w,
-                                          ),
-                                        ),
-                                        onTap: () => Provider.of<QueueModel>(
-                                                context,
-                                                listen: false)
-                                            .delete(widget.index)),
-                                  ),
-                                ),
-                              ),
-                            ],
+                                    )),
                           ),
                         ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 8.w,
+                  ),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: SizedBox(
+                              child: Text(
+                            widget.ytobj.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          )),
+                        ),
+                        Divider(),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: OutlinedButton.icon(
+                              label: buildStatus() ??
+                                  Text(
+                                    "Download",
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                              icon: Icon(
+                                  isDownloading ? Icons.stop : Icons.download),
+                              style: ButtonStyle(
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  minimumSize:
+                                      MaterialStateProperty.all(Size.zero),
+                                  side: MaterialStateProperty.all(BorderSide(
+                                      color: isDownloading
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface)),
+                                  padding:
+                                      MaterialStateProperty.all<EdgeInsets>(
+                                          EdgeInsets.symmetric(
+                                              vertical: 8, horizontal: 10))),
+                              onPressed: () {
+                                if (!isDownloading) {
+                                  setState(() {
+                                    isDownloading = true;
+                                    downloadStatus = DownloadStatus.downloading;
+                                  });
+                                  download();
+                                } else {
+                                  setState(() {
+                                    isDownloading = false;
+                                  });
+                                  rc!.close();
+                                  DownloadManager.stop(
+                                      downloadStatus,
+                                      widget.ytobj,
+                                      downloads!,
+                                      temps!,
+                                      stopPort,
+                                      conversionSession);
+                                  setState(() {
+                                    downloadStatus = DownloadStatus.waiting;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   )
                 ],
               ),
-            )
-          ],
+            ),
+          ),
         ),
       ),
     );

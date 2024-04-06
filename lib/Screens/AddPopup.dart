@@ -16,7 +16,7 @@ class AddModalPopup extends StatefulWidget {
 
 class _AddModalPopupState extends State<AddModalPopup> {
   final TextEditingController _uriController = TextEditingController();
-  Widget downloadButton = Icon(Icons.paste);
+  Widget? downloadButton;
   bool isSearching = false;
   YoutubeQueueObject? vidInfo;
 
@@ -26,11 +26,17 @@ class _AddModalPopupState extends State<AddModalPopup> {
       if (!isSearching) {
         if (_uriController.text.length == 0) {
           setState(() {
-            downloadButton = Icon(Icons.paste);
+            downloadButton = Icon(
+              Icons.paste,
+              color: Theme.of(context).colorScheme.onPrimary,
+            );
           });
         } else {
           setState(() {
-            downloadButton = Icon(Icons.search);
+            downloadButton = Icon(
+              Icons.search,
+              color: Theme.of(context).colorScheme.onPrimary,
+            );
           });
         }
       }
@@ -52,7 +58,9 @@ class _AddModalPopupState extends State<AddModalPopup> {
             child: Container(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.onPrimary)),
             ),
           );
         });
@@ -60,14 +68,20 @@ class _AddModalPopupState extends State<AddModalPopup> {
         vidInfo = await serv.getVidInfo(_uriController.text).then((value) {
           setState(() {
             isSearching = false;
-            downloadButton = Icon(Icons.search);
+            downloadButton = Icon(
+              Icons.search,
+              color: Theme.of(context).colorScheme.onPrimary,
+            );
           });
           return value;
         });
         print(vidInfo!.title);
         setState(() {});
       } catch (e) {
-        downloadButton = Icon(Icons.search);
+        downloadButton = Icon(
+          Icons.search,
+          color: Theme.of(context).colorScheme.onPrimary,
+        );
         GlobalMethods.snackBarError(e.toString(), context, isException: true);
       }
     } else {
@@ -81,6 +95,8 @@ class _AddModalPopupState extends State<AddModalPopup> {
 
   @override
   Widget build(BuildContext context) {
+    downloadButton = downloadButton ??
+        Icon(Icons.paste, color: Theme.of(context).colorScheme.onPrimary);
     if (widget.uri != null) {
       _uriController.text = widget.uri!;
       widget.uri = null;
@@ -90,8 +106,8 @@ class _AddModalPopupState extends State<AddModalPopup> {
       );
     }
     return Container(
-      decoration: const BoxDecoration(
-          color: Colors.white,
+      decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.background,
           borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
       child: AnimatedSize(
         duration: const Duration(milliseconds: 200),
@@ -113,43 +129,39 @@ class _AddModalPopupState extends State<AddModalPopup> {
                     children: [
                       Container(
                           decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.onPrimary,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(20)),
                           width: MediaQuery.of(context).size.width * 0.75,
                           child: TextFormField(
+                            style: Theme.of(context).textTheme.bodyLarge,
                             maxLines: 1,
                             controller: _uriController,
                             decoration: InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
                                     vertical: 13.0, horizontal: 16.0),
-                                hintStyle: TextStyle(
-                                    color: Colors.black, fontSize: 16),
+                                hintStyle:
+                                    Theme.of(context).textTheme.bodyLarge,
                                 hintText: 'Enter Youtube URL',
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
-                                    borderSide: const BorderSide(
-                                        color: Colors.black, width: 1.5)),
+                                    borderSide: BorderSide(
+                                        width: 1.5,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary)),
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20))),
                           )),
                       Padding(
                         padding: const EdgeInsets.all(0.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: SizedBox(
-                            height: 50,
-                            width: 50,
-                            child: TextButton(
-                              style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all(Colors.black),
-                                  overlayColor:
-                                      MaterialStateProperty.all(Colors.grey)),
-                              onPressed: () async {
-                                await search();
-                              },
-                              child: downloadButton,
-                            ),
+                        child: SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: IconButton.filled(
+                            onPressed: () async {
+                              await search();
+                            },
+                            icon: downloadButton!,
                           ),
                         ),
                       ),

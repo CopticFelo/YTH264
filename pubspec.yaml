@@ -48,6 +48,8 @@ dependencies:
     flutter_screenutil:
     clipboard:
     device_info_plus: ^9.1.2
+    dynamic_color: ^1.7.0
+    flutter_svg: ^2.0.10+1
 
 dev_dependencies:
     flutter_test:
@@ -83,6 +85,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets: 
     - assets/Sad_Magnifying_Glass.png
+    - assets/Sad_Magnifying_Glass.svg
     - assets/Err_planet.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
