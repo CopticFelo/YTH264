@@ -57,16 +57,17 @@ class _DownloadOptionsState extends State<DownloadOptions>
           const SizedBox(
             height: 20,
           ),
-          const Text('Video Quality',
-              style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'Lato',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 27)),
+          Text(
+            'Video Quality',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 14, 90, 8),
             child: Container(
                 child: SegmentedButton(
+              style: ButtonStyle(
+                  side: MaterialStateProperty.all(BorderSide(
+                      color: Theme.of(context).colorScheme.primary))),
               showSelectedIcon: false,
               onSelectionChanged: (p0) {
                 setState(() {
@@ -81,44 +82,7 @@ class _DownloadOptionsState extends State<DownloadOptions>
                   (index) => ButtonSegment<String>(
                       value: _qualities[index],
                       label: Text(_qualities[index]))),
-            )
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //   children: List<Widget>.generate(
-                //       3,
-                //       (index) => ChoiceChip(
-                //             backgroundColor:
-                //                 Theme.of(context).colorScheme.onPrimary,
-                //             side: BorderSide.none,
-                //             materialTapTargetSize:
-                //                 MaterialTapTargetSize.shrinkWrap,
-                //             padding: EdgeInsets.symmetric(
-                //                 horizontal: 12, vertical: 0),
-                //             labelPadding: EdgeInsets.all(4.0),
-                //             shape: RoundedRectangleBorder(
-                //                 borderRadius: BorderRadius.circular(20)),
-                //             elevation: 0.0,
-                //             showCheckmark: false,
-                //             label: Text(
-                //               _qualities[index],
-                //               style: TextStyle(
-                //                   fontWeight: FontWeight.w500,
-                //                   fontSize: 16,
-                //                   color: index == _videoQuality
-                //                       ? Colors.white
-                //                       : Colors.black),
-                //             ),
-                //             selected: index == _videoQuality,
-                //             onSelected: (value) {
-                //               setState(() {
-                //                 _videoQuality = index;
-                //                 widget.ytObj!.selectedStream = _res[index];
-                //               });
-                //               print(index);
-                //             },
-                //           )),
-                // )
-                ),
+            )),
           )
         ],
       );
@@ -160,15 +124,14 @@ class _DownloadOptionsState extends State<DownloadOptions>
                           Text(widget.ytObj!.title,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 2,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Lato',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15)),
+                              style: Theme.of(context).textTheme.titleSmall),
                           const SizedBox(
                             height: 5,
                           ),
-                          Text(widget.ytObj!.author)
+                          Text(
+                            widget.ytObj!.author,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          )
                         ],
                       ),
                     ),
@@ -181,17 +144,18 @@ class _DownloadOptionsState extends State<DownloadOptions>
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Download Type',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Lato',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 27)),
+                      Text('Download Type',
+                          style: Theme.of(context).textTheme.headlineSmall),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 14, 0, 8),
                         child: Container(
                           alignment: Alignment.centerLeft,
                           child: SegmentedButton(
+                            style: ButtonStyle(
+                                side: MaterialStateProperty.all(BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary))),
                             showSelectedIcon: false,
                             selected: _downloadType,
                             segments: List<ButtonSegment<String>>.generate(
@@ -208,71 +172,29 @@ class _DownloadOptionsState extends State<DownloadOptions>
                               });
                             },
                           ),
-                          // child: Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //   children:
-                          // List<Widget>.generate(
-                          //     3,
-                          //     (index) => ChoiceChip(
-                          //           backgroundColor: Theme.of(context)
-                          //               .colorScheme
-                          //               .onPrimary,
-                          //           side: BorderSide.none,
-                          //           materialTapTargetSize:
-                          //               MaterialTapTargetSize.shrinkWrap,
-                          //           padding: EdgeInsets.symmetric(
-                          //               horizontal: 12, vertical: 0),
-                          //           labelPadding: EdgeInsets.all(4.0),
-                          //           shape: RoundedRectangleBorder(
-                          //               borderRadius:
-                          //                   BorderRadius.circular(20)),
-                          //           elevation: 0.0,
-                          //           showCheckmark: false,
-                          //           label: Text(
-                          //             _types[index],
-                          //             style: TextStyle(
-                          //                 fontWeight: FontWeight.bold,
-                          //                 fontSize: 14,
-                          //                 color: index == _downloadType
-                          //                     ? Colors.white
-                          //                     : Colors.black),
-                          //           ),
-                          //           selected: index == _downloadType,
-                          //           onSelected: (value) {
-                          //             setState(() {
-                          //               _downloadType = index;
-                          // widget.ytObj!.type = DownloadType
-                          //     .values[_downloadType];
-                          //             });
-                          //             print(_downloadType);
-                          //           },
-                          //         )),
-                          // )
                         ),
                       ),
                       getVideoQualties(),
                       const SizedBox(height: 80),
-                      InkWell(
-                        onTap: () {
+                      FilledButton(
+                        style: ButtonStyle(
+                            side: MaterialStateProperty.all(BorderSide(
+                                color: Theme.of(context).colorScheme.primary))),
+                        onPressed: () {
                           Navigator.of(context).pop<QueueObject>(widget.ytObj);
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 0, horizontal: 10),
-                          child: Container(
-                            width: double.infinity,
-                            height: 43,
-                            decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: const Center(
-                              child: Text('Add to Queue',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Lato',
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17)),
-                            ),
+                          child: Center(
+                            child: Text('Add to Queue',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary)),
                           ),
                         ),
                       )
