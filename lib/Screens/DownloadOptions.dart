@@ -47,6 +47,8 @@ class _DownloadOptionsState extends State<DownloadOptions>
     ];
     if (_videoQuality == null) {
       _videoQuality = {_qualities[0]};
+      widget.ytObj!.selectedStream =
+          widget.ytObj!.videoOnlyStreams[_qualities[0]]!;
     }
     if ((_downloadType.first == "Muxed" ||
             _downloadType.first == "VideoOnly") &&
