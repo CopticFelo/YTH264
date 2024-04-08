@@ -148,14 +148,13 @@ class _QueuePageState extends State<QueuePage> {
                           end: Offset(0, 0),
                         ).animate(animation),
                         child: ChangeNotifierProvider(
+                            key: key,
                             create: (context) => QueueWidgetModel(
                                 context: context,
                                 ytObj: value.queue[index],
                                 index: index),
                             builder: (context, child) {
-                              return QueueWidget(
-                                key: key,
-                              );
+                              return QueueWidget();
                             }),
                       );
                       if (index != 0) {

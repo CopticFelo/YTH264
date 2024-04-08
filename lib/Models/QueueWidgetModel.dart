@@ -1,16 +1,18 @@
 import 'dart:isolate';
 import 'dart:io';
 import 'package:YT_H264/Services/QueueObject.dart';
+import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:YT_H264/Services/DownloadManager.dart';
 import 'package:YT_H264/Services/GlobalMethods.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_session.dart';
+import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-enum DownloadStatus { waiting, inQueue, downloading, converting, done, error }
+enum DownloadStatus { waiting, downloading, converting, done }
 
 class QueueWidgetModel with ChangeNotifier {
   DownloadStatus downloadStatus = DownloadStatus.waiting;
@@ -28,7 +30,52 @@ class QueueWidgetModel with ChangeNotifier {
   QueueWidgetModel(
       {required this.context, required this.ytObj, required this.index});
 
-  void end_download() {
+  void openAudio() async {
+    if (Platform.isAndroid) {
+      DeviceInfoPlugin info = DeviceInfoPlugin();
+      AndroidDeviceInfo androidInfo = await info.androidInfo;
+      if (androidInfo.version.sdkInt >= 29) {
+        if (await Permission.audio.request().isDenied) {
+          GlobalMethods.snackBarError('Missing permissions', context);
+          return;
+        }
+      }
+    }
+
+    String path = '${downloads!.path}/${ytObj.validTitle}.mp3';
+    var result = await OpenFile.open(path);
+  }
+
+  void openVideo() async {
+    if (Platform.isAndroid) {
+      DeviceInfoPlugin info = DeviceInfoPlugin();
+      AndroidDeviceInfo androidInfo = await info.androidInfo;
+      if (androidInfo.version.sdkInt >= 29) {
+        if (await Permission.videos.request().isDenied) {
+          GlobalMethods.snackBarError('Missing permissions', context);
+          return;
+        }
+      }
+    }
+
+    String path = '${downloads!.path}/${ytObj.validTitle}.mp4';
+    var result = await OpenFile.open(path);
+  }
+
+  void complete(FFmpegSession session) async {
+    final returnCode = await session.getReturnCode();
+    if (!ReturnCode.isSuccess(returnCode) && !ReturnCode.isCancel(returnCode)) {
+      String? msg = await session.getOutput();
+      GlobalMethods.snackBarError(msg!, context);
+      DownloadManager.clean(ytObj, downloads!, temps!, false);
+      downloadStatus = DownloadStatus.waiting;
+      isDownloading = false;
+      notifyListeners();
+      return;
+    }
+
+    print(session.getOutput());
+    DownloadManager.clean(ytObj, downloads!, temps!, false);
     downloadStatus = DownloadStatus.done;
     isDownloading = false;
     notifyListeners();
@@ -171,14 +218,14 @@ class QueueWidgetModel with ChangeNotifier {
             downloadStatus == DownloadStatus.converting) {
           // Convert it from .webm (in temp folder) to .mp3 (to be in downloads folder)
           conversionSession = await DownloadManager.convertToMp3(
-              downloads, ytObj, end_download, temps!, context);
+              downloads, ytObj, complete, temps!, context);
           // Note: that Youtube Explode Muxed Video (i.e doesn't need conversion) only supports upto 720p, thus it is not used
           // if DownloadStatus (recieved from data[0]) is converting and the media is Muxed (i.e Video + Audio)
         } else if (ytObj.downloadType == DownloadType.Muxed &&
             downloadStatus == DownloadStatus.converting) {
           // Combine .webm (in temp folder) + mp4 (audioless, in temp folder) into .mp4 (with audio, to be in downloads folder)
           conversionSession = await DownloadManager.mergeIntoMp4(
-              temps, downloads, ytObj, end_download, context);
+              temps, downloads, ytObj, complete, context);
         }
       } else {
         // Means this is either the Sendport that will be used to
@@ -188,6 +235,7 @@ class QueueWidgetModel with ChangeNotifier {
           stopPort = data[0];
         } else {
           // Displays a Snackbar
+          this.downloadStatus = DownloadStatus.waiting;
           GlobalMethods.snackBarError(data[0], context, isException: true);
         }
       }

@@ -2,10 +2,12 @@
 // TODO: CLEAN QUEUEWIDGET.DART
 import 'package:YT_H264/Models/QueueModel.dart';
 import 'package:YT_H264/Models/QueueWidgetModel.dart';
+import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:YT_H264/Services/DownloadManager.dart';
+import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 
 class QueueWidget extends StatefulWidget {
@@ -24,7 +26,8 @@ class QueueWidgetState extends State<QueueWidget>
       child: Dismissible(
         onDismissed: (direction) =>
             Provider.of<QueueModel>(context, listen: false).delete(
-                Provider.of<QueueWidgetModel>(context, listen: false).index),
+                Provider.of<QueueWidgetModel>(context, listen: false).index,
+                true),
         key: ValueKey(
             Provider.of<QueueWidgetModel>(context, listen: false).index),
         child: Card(
@@ -113,6 +116,16 @@ class QueueWidgetState extends State<QueueWidget>
                             padding: const EdgeInsets.all(2.0),
                             child: Consumer<QueueWidgetModel>(
                                 builder: (context, value, child) {
+                              if (value.downloadStatus == DownloadStatus.done) {
+                                return FilledButton.icon(
+                                  onPressed: () => value.ytObj.downloadType ==
+                                          DownloadType.AudioOnly
+                                      ? value.openAudio()
+                                      : value.openVideo(),
+                                  icon: Icon(Icons.play_arrow),
+                                  label: Text("Play"),
+                                );
+                              }
                               return OutlinedButton.icon(
                                 label: value.buildStatus() ??
                                     Text(

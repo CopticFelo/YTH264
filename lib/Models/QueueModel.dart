@@ -14,17 +14,19 @@ class QueueModel with ChangeNotifier {
     return _downloadQueue;
   }
 
-  void delete(int index) {
-    listkey.currentState!.removeItem(
-        index,
-        ((context, animation) => SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1, 0),
-                end: Offset(0, 0),
-              ).animate(animation),
-              child: QueueWidget(),
-            )),
-        duration: Duration(milliseconds: 0));
+  void delete(int index, bool removeWidget) {
+    if (removeWidget) {
+      listkey.currentState!.removeItem(
+          index,
+          ((context, animation) => SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset(0, 0),
+                ).animate(animation),
+                child: QueueWidget(),
+              )),
+          duration: Duration(milliseconds: 0));
+    }
     keys.removeAt(index);
     _downloadQueue.removeAt(index);
     isEmpty = _downloadQueue.isEmpty;
