@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
-import '../Widgets/QueueWidget.dart';
+import '../Models/QueueWidgetModel.dart';
 import 'QueueObject.dart';
 
 class DownloadManager {

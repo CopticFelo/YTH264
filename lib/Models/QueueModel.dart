@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Services/QueueObject.dart';
 import '../Widgets/QueueWidget.dart';
@@ -16,7 +15,6 @@ class QueueModel with ChangeNotifier {
   }
 
   void delete(int index) {
-    QueueObject obj = _downloadQueue[index];
     listkey.currentState!.removeItem(
         index,
         ((context, animation) => SlideTransition(
@@ -24,8 +22,7 @@ class QueueModel with ChangeNotifier {
                 begin: const Offset(1, 0),
                 end: Offset(0, 0),
               ).animate(animation),
-              child:
-                  QueueWidget(ytobj: obj as YoutubeQueueObject, index: index),
+              child: QueueWidget(),
             )),
         duration: Duration(milliseconds: 0));
     keys.removeAt(index);
