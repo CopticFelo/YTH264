@@ -1,16 +1,14 @@
 // ignore: file_names
 
 import 'dart:async';
-import 'dart:developer';
-
 import 'package:YT_H264/Models/QueueModel.dart';
+import 'package:YT_H264/Models/QueueWidgetModel.dart';
 import 'package:YT_H264/Screens/EmptyList.dart';
 import 'package:flutter/material.dart';
 import 'package:YT_H264/Screens/AddPopup.dart';
 import 'package:YT_H264/Services/QueueObject.dart';
 import 'package:YT_H264/Widgets/QueueWidget.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -149,11 +147,15 @@ class _QueuePageState extends State<QueuePage> {
                           begin: const Offset(-1, 0),
                           end: Offset(0, 0),
                         ).animate(animation),
-                        child: QueueWidget(
-                          key: key,
-                          ytobj: value.queue[index],
-                          index: index,
-                        ),
+                        child: ChangeNotifierProvider(
+                            key: key,
+                            create: (context) => QueueWidgetModel(
+                                context: context,
+                                ytObj: value.queue[index],
+                                index: index),
+                            builder: (context, child) {
+                              return QueueWidget();
+                            }),
                       );
                       if (index != 0) {
                         return Column(

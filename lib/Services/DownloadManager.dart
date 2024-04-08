@@ -3,13 +3,14 @@ import 'dart:isolate';
 import 'package:YT_H264/Services/GlobalMethods.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
+import 'package:ffmpeg_kit_flutter_full/session.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
-import '../Widgets/QueueWidget.dart';
+import '../Models/QueueWidgetModel.dart';
 import 'QueueObject.dart';
 
 class DownloadManager {
@@ -137,7 +138,7 @@ class DownloadManager {
   static Future<FFmpegSession> convertToMp3(
       Directory? downloads,
       YoutubeQueueObject ytobj,
-      Function callBack,
+      void Function(FFmpegSession) callBack,
       Directory temp,
       BuildContext context) async {
     String imgPath = '${temp.path}/${ytobj.validTitle}.jpg';
@@ -177,21 +178,7 @@ class DownloadManager {
     }
 
     print(args);
-    return await FFmpegKit.executeWithArgumentsAsync(args, (session) async {
-      final returnCode = await session.getReturnCode();
-
-      if (!ReturnCode.isSuccess(returnCode) &&
-          !ReturnCode.isCancel(returnCode)) {
-        GlobalMethods.snackBarError(session.getOutput().toString(), context);
-        clean(ytobj, downloads, temp, true);
-      }
-
-      clean(ytobj, downloads, temp, false);
-
-      callBack();
-
-      return;
-    }, ((log) {
+    return await FFmpegKit.executeWithArgumentsAsync(args, callBack, ((log) {
       print(log.getMessage());
     }));
   }
@@ -200,7 +187,7 @@ class DownloadManager {
       Directory? temps,
       Directory? downloads,
       YoutubeQueueObject ytobj,
-      Function callBack,
+      void Function(FFmpegSession) callBack,
       BuildContext context) async {
     String audioDir =
         "${temps!.path}/${ytobj.validTitle}-A.${ytobj.bestAudio.container.name}";
@@ -224,24 +211,7 @@ class DownloadManager {
       '$outDir'
     ];
 
-    return await FFmpegKit.executeWithArgumentsAsync(args, (session) async {
-      final returnCode = await session.getReturnCode();
-
-      if (!ReturnCode.isSuccess(returnCode) &&
-          !ReturnCode.isCancel(returnCode)) {
-        String? msg = await session.getOutput();
-        GlobalMethods.snackBarError(msg!, context);
-        clean(ytobj, downloads, temps, true);
-      }
-
-      print(session.getOutput());
-      // File oldAudio = File(audioDir);
-      // await oldAudio.delete();
-      // File oldVideo = File(videoDir);
-      // await oldVideo.delete();
-      clean(ytobj, downloads, temps, false);
-      callBack();
-    }, ((log) {
+    return await FFmpegKit.executeWithArgumentsAsync(args, callBack, ((log) {
       print(log.getMessage());
     }));
   }
