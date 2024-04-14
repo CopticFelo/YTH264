@@ -11,7 +11,8 @@ import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 
 class QueueWidget extends StatefulWidget {
-  QueueWidget({super.key});
+  int index;
+  QueueWidget({super.key, required this.index});
 
   @override
   State<QueueWidget> createState() => QueueWidgetState();
@@ -25,11 +26,11 @@ class QueueWidgetState extends State<QueueWidget>
       padding: const EdgeInsets.all(8.0),
       child: Dismissible(
         onDismissed: (direction) =>
-            Provider.of<QueueModel>(context, listen: false).delete(
-                Provider.of<QueueWidgetModel>(context, listen: false).index,
-                true),
-        key: ValueKey(
-            Provider.of<QueueWidgetModel>(context, listen: false).index),
+            Provider.of<QueueModel>(context, listen: false)
+                .delete(widget.index, true),
+        // key: ValueKey(
+        //     Provider.of<QueueWidgetModel>(context, listen: false).index),
+        key: UniqueKey(),
         child: Card(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),

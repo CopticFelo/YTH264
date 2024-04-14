@@ -23,7 +23,9 @@ class QueueModel with ChangeNotifier {
                   begin: const Offset(1, 0),
                   end: Offset(0, 0),
                 ).animate(animation),
-                child: QueueWidget(),
+                child: QueueWidget(
+                  index: index,
+                ),
               )),
           duration: Duration(milliseconds: 0));
     }

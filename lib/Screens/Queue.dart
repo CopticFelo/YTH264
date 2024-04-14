@@ -150,11 +150,9 @@ class _QueuePageState extends State<QueuePage> {
                         child: ChangeNotifierProvider(
                             key: key,
                             create: (context) => QueueWidgetModel(
-                                context: context,
-                                ytObj: value.queue[index],
-                                index: index),
+                                context: context, ytObj: value.queue[index]),
                             builder: (context, child) {
-                              return QueueWidget();
+                              return QueueWidget(index: index);
                             }),
                       );
                       if (index != 0) {
