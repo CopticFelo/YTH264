@@ -25,10 +25,8 @@ class QueueWidgetModel with ChangeNotifier {
   FFmpegSession? conversionSession;
   final BuildContext context;
   final YoutubeQueueObject ytObj;
-  final int index;
 
-  QueueWidgetModel(
-      {required this.context, required this.ytObj, required this.index});
+  QueueWidgetModel({required this.context, required this.ytObj});
 
   void openAudio() async {
     if (Platform.isAndroid) {
