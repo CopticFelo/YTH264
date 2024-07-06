@@ -1,8 +1,9 @@
+> [!NOTE]
+> This development of this project is currently halted, As of 6/7/2024 the app is still very buggy, barely usable and missing a lot of features, Use [Seal downloader](https://github.com/JunkFood02/Seal) instead.
+
 # YT-H264
 
 A Clean / Modern Youtube Video downloader app without Ads or spyware made using Flutter. It's more of a personal project but feel free to contribute if you want.
-
-**Note**: It's still a Work in progress.
 
 P.S: Please let me know if you have a better name.
 
